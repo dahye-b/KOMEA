@@ -1,0 +1,1057 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.komeaweb.com.service.impl.DisplayMapper">
+
+	<!-- 전시상담포털 > MyDesk > 지원사업관리 -->
+	<select id="SelectExbiAndCnsltList" parameterType="showVO" resultType="showVO">
+			SELECT * FROM (
+				SELECT
+					E.EXBI_CD AS CODE, E.EXBI_NM AS NAME, '0' AS GUBUN, E.OPMT_PLACE AS PLACE, 
+					E.OPMT_BEGIN_DE AS FROM_DATE, E.OPMT_CLOS_DE AS CLOSE_DATE, IFNULL(E.SUPPORT_ORGAN_NM, '') AS INSTT_NM,
+					E.INSTT_MBER_CD, DATE_FORMAT(E.INSERT_USER_DT, '%Y-%m-%d') REGIST_DATE, E.OLD_YN, E.PROGRS_STTUS,
+					CB.CD_KOR PROGRS_STTUS_NM, CB.CD_REF1 PROGRS_STTUS_CLS, 
+					CASE WHEN E.PROGRS_STTUS = '0' AND E.SLCTN_YN = 'N' THEN 'M'
+						WHEN E.PROGRS_STTUS = '4' THEN 'ER'
+						WHEN E.PROGRS_STTUS = '5' THEN 'AR'
+					ELSE '' END BUTTON_STAT
+				FROM
+					EXBI_REGIST_INFO E JOIN MBER_INFO M
+						ON E.INSTT_MBER_CD = M.MBER_CD
+					JOIN CODEBOOK CB
+						ON CONCAT(E.PROGRS_STTUS , IFNULL(E.SLCTN_YN, '')) = CB.CD_ITEM
+					AND CB.CD_DEC = 'PROGRS_STTUS'
+				UNION ALL 
+				SELECT
+					C.CNSLTEXHB_CD AS CODE, C.EVENT_NM AS NAME, '1' AS GUBUN,C.PLACE AS PLACE,
+					C.EVENT_BEGIN_DE AS FROM_DATE, C.EVENT_CLOS_DE AS CLOSE_DATE, M.INSTT_NM AS INSTT_NM,
+					C.INSTT_MBER_CD, DATE_FORMAT(C.INSERT_USER_DT, '%Y-%m-%d') REGIST_DATE, C.OLD_YN, C.PROGRS_STTUS,
+					CB.CD_KOR PROGRS_STTUS_NM, CB.CD_REF1 PROGRS_STTUS_CLS,
+					CASE WHEN C.PROGRS_STTUS = '0' AND C.SLCTN_AT = 'N' THEN 'M'
+						WHEN C.PROGRS_STTUS = '0' AND C.SLCTN_AT = 'Y' THEN 'B'
+						WHEN C.PROGRS_STTUS = '4' THEN 'ER'
+						WHEN C.PROGRS_STTUS = '5' THEN 'AR'
+					ELSE '' END BUTTON_STAT
+				FROM
+					CNSLTEXHB_REGIST_INFO C JOIN MBER_INFO M
+						ON C.INSTT_MBER_CD = M.MBER_CD
+					JOIN CODEBOOK CB
+						ON CONCAT(C.PROGRS_STTUS , IFNULL(C.SLCTN_AT, '')) = CB.CD_ITEM
+						AND CB.CD_DEC = 'PROGRS_STTUS'
+			) O
+			WHERE 1=1
+			<if test="gb != null and gb != ''">
+				<choose>
+					<when test="gb == 0">
+						AND O.GUBUN = #{gb}
+					</when>
+					<when test="gb == 1">
+						AND O.GUBUN IN ( '1' , '2' )
+					</when>
+					<when test="gb == 2">
+						AND O.INSTT_MBER_CD = '1201405001'
+					</when>					
+					<otherwise>
+					</otherwise>
+				</choose>
+			</if>
+			<if test="searchKeyword != null and searchKeyword != ''">
+				AND O.NAME LIKE '%${searchKeyword}%'
+			</if>
+			<if test="year != null and year != ''">
+				AND O.CLOSE_DATE LIKE '%${year}%'
+			</if>
+			<if test="fromDate != null and fromDate != ''">
+			<![CDATA[
+				AND O.FROM_DATE <= REPLACE(#{fromDate},'-')
+				]]>
+			</if>
+			<if test="closeDate != null and closeDate != ''">
+			<![CDATA[
+				AND O.FROM_DATE > REPLACE(#{closeDate},'-')
+				]]>
+			</if>
+			<if test='authYn != null and authYn != "" and authYn == "Y"'>
+				AND O.INSTT_MBER_CD = #{insttMberCd}
+			</if>
+			<if test="progrsSttus != null and progrsSttus != '' and progrsSttus != '9'">
+				AND O.PROGRS_STTUS = #{progrsSttus}
+			</if>
+			ORDER BY REGIST_DATE DESC
+		LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+
+	<select id="SelectExbiAndCnsltListTotCnt" parameterType="showVO" resultType="int">
+		SELECT COUNT(*) cnt
+		FROM (
+				SELECT
+					E.EXBI_CD AS CODE, E.EXBI_NM AS NAME, '0' AS GUBUN, E.OPMT_PLACE AS PLACE, 
+					E.OPMT_BEGIN_DE AS FROM_DATE, E.OPMT_CLOS_DE AS CLOSE_DATE, IFNULL(E.SUPPORT_ORGAN_NM, '') AS INSTT_NM,
+					E.INSTT_MBER_CD, DATE_FORMAT(E.INSERT_USER_DT, '%Y-%m-%d') REGIST_DATE, E.OLD_YN, E.PROGRS_STTUS,
+					CB.CD_KOR PROGRS_STTUS_NM, CB.CD_REF1 PROGRS_STTUS_CLS, 
+					CASE WHEN E.PROGRS_STTUS = '0' AND E.SLCTN_YN = 'N' THEN 'M'
+						WHEN E.PROGRS_STTUS = '4' THEN 'ER'
+						WHEN E.PROGRS_STTUS = '5' THEN 'AR'
+					ELSE '' END BUTTON_STAT
+				FROM
+					EXBI_REGIST_INFO E JOIN MBER_INFO M
+						ON E.INSTT_MBER_CD = M.MBER_CD
+					JOIN CODEBOOK CB
+						ON CONCAT(E.PROGRS_STTUS , IFNULL(E.SLCTN_YN, '')) = CB.CD_ITEM
+					AND CB.CD_DEC = 'PROGRS_STTUS'
+				UNION ALL 
+				SELECT
+					C.CNSLTEXHB_CD AS CODE, C.EVENT_NM AS NAME, '1' AS GUBUN,C.PLACE AS PLACE,
+					C.EVENT_BEGIN_DE AS FROM_DATE, C.EVENT_CLOS_DE AS CLOSE_DATE, M.INSTT_NM AS INSTT_NM,
+					C.INSTT_MBER_CD, DATE_FORMAT(C.INSERT_USER_DT, '%Y-%m-%d') REGIST_DATE, C.OLD_YN, C.PROGRS_STTUS,
+					CB.CD_KOR PROGRS_STTUS_NM, CB.CD_REF1 PROGRS_STTUS_CLS,
+					CASE WHEN C.PROGRS_STTUS = '0' AND C.SLCTN_AT = 'N' THEN 'M'
+						WHEN C.PROGRS_STTUS = '0' AND C.SLCTN_AT = 'Y' THEN 'B'
+						WHEN C.PROGRS_STTUS = '4' THEN 'ER'
+						WHEN C.PROGRS_STTUS = '5' THEN 'AR'
+					ELSE '' END BUTTON_STAT
+				FROM
+					CNSLTEXHB_REGIST_INFO C JOIN MBER_INFO M
+						ON C.INSTT_MBER_CD = M.MBER_CD
+					JOIN CODEBOOK CB
+						ON CONCAT(C.PROGRS_STTUS , IFNULL(C.SLCTN_AT, '')) = CB.CD_ITEM
+						AND CB.CD_DEC = 'PROGRS_STTUS'
+			) O
+			WHERE 1=1
+			<if test="gb != null and gb != ''">
+				<choose>
+					<when test="gb == 0">
+						AND O.GUBUN = #{gb}
+					</when>
+					<when test="gb == 1">
+						AND O.GUBUN IN ( '1' , '2' )
+					</when>
+					<when test="gb == 2">
+						AND O.INSTT_MBER_CD = '1201405001'
+					</when>					
+					<otherwise>
+					</otherwise>
+				</choose>
+			</if>
+			<if test="searchKeyword != null and searchKeyword != ''">
+				AND O.NAME LIKE '%${searchKeyword}%'
+			</if>
+			<if test="year != null and year != ''">
+				AND O.CLOSE_DATE LIKE '%${year}%'
+			</if>
+			<if test="fromDate != null and fromDate != ''">
+			<![CDATA[
+				AND O.FROM_DATE <= REPLACE(#{fromDate},'-')
+				]]>
+			</if>
+			<if test="closeDate != null and closeDate != ''">
+			<![CDATA[
+				AND O.FROM_DATE > REPLACE(#{closeDate},'-')
+				]]>
+			</if>
+			<if test='authYn != null and authYn != "" and authYn == "Y"'>
+				AND O.INSTT_MBER_CD = #{insttMberCd}
+			</if>
+			<if test="progrsSttus != null and progrsSttus != '' and progrsSttus != '9'">
+				AND O.PROGRS_STTUS = #{progrsSttus}
+			</if>
+	</select>
+	
+	<!-- 전시상담포털 > MyDesk > 지원사업관리 : 진행사항업데이트 -->
+	<update id="UpdateProgressStatus" parameterType="showVO">
+		<choose>
+			<when test="gubun == 0">
+				UPDATE EXBI_REGIST_INFO
+				 SET PROGRS_STTUS = #{progrsSttus}
+			    WHERE  EXBI_CD = #{code}
+			</when>
+			<when test="gubun == 1">
+				UPDATE CNSLTEXHB_REGIST_INFO
+				 SET PROGRS_STTUS = #{progrsSttus}
+			    WHERE  CNSLTEXHB_CD = #{code}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</update> 
+	
+	<!-- 전시상담포털 > MyDesk > 지원사업관리 : 삭제 -->
+	<delete id="DeleteExbiInfoFile" parameterType="showVO">
+		DELETE FROM EXBI_REGIST_FILE_INFO
+		 WHERE EXBI_CD = #{code}
+	</delete>
+	<delete id="DeleteExbi" parameterType="showVO">
+		DELETE FROM EXBI_REGIST_INFO
+		 WHERE EXBI_CD = #{code}
+	</delete>
+	<delete id="DeleteCnsltFile" parameterType="showVO">
+		DELETE FROM CNSLTEXHB_REGIST_FILE_INFO
+		 WHERE CNSLTEXHB_CD = #{code}
+	</delete>
+	<delete id="DeleteCnslt" parameterType="showVO">
+		DELETE FROM CNSLTEXHB_REGIST_INFO
+		 WHERE CNSLTEXHB_CD = #{code}
+	</delete>
+	
+	<select id="ExbiRegistInfoEdit" parameterType="showVO" resultType="showVO">
+			SELECT A.*, B.*
+			FROM
+			    EXBI_REGIST_INFO A
+			    LEFT JOIN EXBI_REGIST_FILE_INFO B
+			    ON A.INSTT_MBER_CD = B.INSTT_MBER_CD
+			    AND A.EXBI_CD = B.EXBI_CD
+			WHERE
+			    A.EXBI_CD = #{code}
+	</select>
+	
+	<select id="CnsltexhbRegistInfoEdit" parameterType="showVO" resultType="showVO">
+			SELECT
+			    A.*, B.*
+			FROM
+			    CNSLTEXHB_REGIST_INFO A
+			    LEFT JOIN CNSLTEXHB_REGIST_FILE_INFO B
+			    ON A.INSTT_MBER_CD = B.INSTT_MBER_CD
+			    AND A.CNSLTEXHB_CD = B.CNSLTEXHB_CD
+			WHERE
+			    A.CNSLTEXHB_CD = #{code}
+			    <if test="gubun != null and gubun != ''">
+			    AND A.CNSLTEXHB_GB = #{gubun}
+			    </if>
+	</select>
+
+	<!-- 전시상담포털 > MyDesk > 지원사업관리 : 전시사업 입력 -->
+	<insert id="InsertSuppBizManageExbi" parameterType="showVO">
+		<selectKey resultType="String" keyProperty="exbiCd" order="BEFORE">
+	      select concat('0',cast(IFNULL(MAX(EXBI_CD),cast(concat(DATE_FORMAT(NOW(), "%Y"),'000') as unsigned ))+1 as char))  EXBI_CD
+	      FROM  EXBI_REGIST_INFO
+	      WHERE EXBI_CD LIKE concat('0',cast(DATE_FORMAT(NOW(), "%Y") as char),'%')
+		</selectKey>
+		INSERT INTO EXBI_REGIST_INFO (INSTT_MBER_CD, EXBI_CD, EXBI_NM, OPMT_BEGIN_DE, OPMT_CLOS_DE,
+	      OPMT_PLACE, OPMT_CYCLE, PARTCPT_SUMRY, PARTCPT_REQST_MTH, SPORT_CN, RCEPT_BEGIN_DE,
+	      RCEPT_CLOS_DE, CO_PAYAMT1, CO_PAYAMT2, PARTCPT_INCLS_MATTER, RCPMNY_ACNUT, DPSTR, CHARGER_NM,
+	      CHARGER_TLPHON, CHARGER_FAX, CHARGER_EMAIL, SPCE_BY_MG, SLCTN_YN, PROGRS_STTUS,
+	      INSERT_USER_ID, UPDATE_USER_DT, UPDATE_USER_ID, INSERT_USER_DT, PRE_EXBI_CD, HOMEPAGE,
+	      KOR_PARTCPT_SCALE, TOTAL_COUNSEL_RESULT, ETC_RESULT, RESULT_VIEW_YN, NOTICE_ITEMS,
+	      EXBI_NM_ENG, EXBI_CHARGER_DEPT, EXBI_CHARGER_OFCPS, SPCE_BY_UNIT, SUPPORT_ORGAN_NM,
+	      MAIN_INSTT_NM, OLD_YN, TOTAL_PARTCPT_SCALE, TOTAL_PARTCPT_CNT, TOTAL_PARTCPT_PEOPLE,
+	      CNSLT_CNT, CNSLT_MONEY, CONTRACT_CNT, CONTRACT_MONEY, KOR_PARTCPT_COMP_CNT,
+	      KOR_PARTCPT_SPCE_CNT, KOR_PARTCPT_SCALE_NUM, PLACE_INFO)
+	    values (#{insttMberCd}, #{exbiCd}, #{exbiNm}, #{opmtBeginDe},
+	      #{opmtClosDe}, #{opmtPlace}, #{opmtCycle}, #{partcptSumry},
+	      #{partcptReqstMth}, #{sportCn}, #{rceptBeginDe}, #{rceptClosDe},
+	      #{coPayamt1}, #{coPayamt2}, #{partcptInclsMatter}, #{rcpmnyAcnut},
+	      #{dpstr}, #{chargerNm}, #{chargerTlphon}, #{chargerFax},
+	      #{chargerEmail}, #{spceByMg}, #{slctnYn}, '0',
+	      #{insertUserId}, NOW(), #{updateUserId},
+	      NOW(), #{preExbiCd}, #{homepage}, #{korPartcptScale},
+	      #{totalCounselResult}, #{etcResult}, #{resultViewYn},
+	      #{noticeItems}, #{exbiNmEng}, #{exbiChargerDept},
+	      #{exbiChargerOfcps}, #{spceByUnit}, #{supportOrganNm},
+	      #{mainInsttNm}, #{oldYn}, #{totalPartcptScale},
+	      #{totalPartcptCnt}, #{totalPartcptPeople}, #{cnsltCnt},
+	      #{cnsltMoney}, #{contractCnt}, #{contractMoney},
+	      #{korPartcptCompCnt}, #{korPartcptSpceCnt}, #{korPartcptScaleNum},
+	      #{placeInfo})
+	</insert>
+	
+	<insert id="InsertSuppBizManageExbiFile" parameterType="showVO">
+	INSERT INTO EXBI_REGIST_FILE_INFO (INSTT_MBER_CD, EXBI_CD, INSERT_USER_ID, UPDATE_USER_DT, UPDATE_USER_ID, INSERT_USER_DT)
+	VALUES(#{insttMberCd}, #{exbiCd}, #{insertUserId}, #{updateUserDt}, #{updateUserId}, #{insertUserDt})
+	</insert>
+	
+	<!-- 전시상담포털 > MyDesk > 지원사업관리 : 전시사업 업데이트 -->
+	<update id="UpdateSuppBizManageExbi" parameterType="showVO">
+	    UPDATE EXBI_REGIST_INFO
+	    <set>
+			<if test="exbiNm != null">EXBI_NM = #{exbiNm},</if>
+			<if test="opmtBeginDe != null">OPMT_BEGIN_DE = #{opmtBeginDe},</if>
+			<if test="opmtClosDe != null">OPMT_CLOS_DE = #{opmtClosDe},</if>
+			<if test="opmtPlace != null">OPMT_PLACE = #{opmtPlace},</if>
+			<if test="opmtCycle != null">OPMT_CYCLE = #{opmtCycle},</if>
+			<if test="partcptSumry != null">PARTCPT_SUMRY = #{partcptSumry},</if>
+			<if test="partcptReqstMth != null">PARTCPT_REQST_MTH = #{partcptReqstMth},</if>
+			<if test="sportCn != null">SPORT_CN = #{sportCn},</if>
+			<if test="rceptBeginDe != null">RCEPT_BEGIN_DE = #{rceptBeginDe},</if>
+			<if test="rceptClosDe != null">RCEPT_CLOS_DE = #{rceptClosDe},</if>
+			<if test="coPayamt1 != null">CO_PAYAMT1 = #{coPayamt1},</if>
+			<if test="coPayamt2 != null">CO_PAYAMT2 = #{coPayamt2},</if>
+			<if test="partcptInclsMatter != null">PARTCPT_INCLS_MATTER = #{partcptInclsMatter},</if>
+			<if test="rcpmnyAcnut != null">RCPMNY_ACNUT = #{rcpmnyAcnut},</if>
+			<if test="dpstr != null">DPSTR = #{dpstr},</if>
+			<if test="chargerNm != null">CHARGER_NM = #{chargerNm},</if>
+			<if test="chargerTlphon != null">CHARGER_TLPHON = #{chargerTlphon},</if>
+			<if test="chargerFax != null">CHARGER_FAX = #{chargerFax},</if>
+			<if test="chargerEmail != null">CHARGER_EMAIL = #{chargerEmail},</if>
+			<if test="spceByMg != null">SPCE_BY_MG = #{spceByMg},</if>
+			<if test="slctnYn != null">SLCTN_YN = #{slctnYn},</if>
+			<if test="progrsSttus != null">PROGRS_STTUS = #{progrsSttus},</if>
+			<if test="preExbiCd != null">PRE_EXBI_CD = #{preExbiCd},</if>
+			<if test="homepage != null">HOMEPAGE = #{homepage},</if>
+			<if test="korPartcptScale != null">KOR_PARTCPT_SCALE = #{korPartcptScale},</if>
+			<if test="totalCounselResult != null">TOTAL_COUNSEL_RESULT = #{totalCounselResult},</if>
+			<if test="etcResult != null">ETC_RESULT = #{etcResult},</if>
+			<if test="resultViewYn != null">RESULT_VIEW_YN = #{resultViewYn},</if>
+			<if test="noticeItems != null">NOTICE_ITEMS = #{noticeItems},</if>
+			<if test="exbiNmEng != null">EXBI_NM_ENG = #{exbiNmEng},</if>
+			<if test="exbiChargerDept != null">EXBI_CHARGER_DEPT = #{exbiChargerDept},</if>
+			<if test="exbiChargerOfcps != null">EXBI_CHARGER_OFCPS = #{exbiChargerOfcps},</if>
+			<if test="spceByUnit != null">SPCE_BY_UNIT = #{spceByUnit},</if>
+			<if test="supportOrganNm != null">SUPPORT_ORGAN_NM = #{supportOrganNm},</if>
+			<if test="mainInsttNm != null">MAIN_INSTT_NM = #{mainInsttNm},</if>
+			<if test="oldYn != null">OLD_YN = #{oldYn},</if>
+			<if test="totalPartcptScale != null">TOTAL_PARTCPT_SCALE = #{totalPartcptScale},</if>
+			<if test="totalPartcptCnt != null">TOTAL_PARTCPT_CNT = #{totalPartcptCnt},</if>
+			<if test="totalPartcptPeople != null">TOTAL_PARTCPT_PEOPLE = #{totalPartcptPeople},</if>
+			<if test="cnsltCnt != null">CNSLT_CNT = #{cnsltCnt},</if>
+			<if test="cnsltMoney != null">CNSLT_MONEY = #{cnsltMoney},</if>
+			<if test="contractCnt != null">CONTRACT_CNT = #{contractCnt},</if>
+			<if test="contractMoney != null">CONTRACT_MONEY = #{contractMoney},</if>
+			<if test="korPartcptCompCnt != null">KOR_PARTCPT_COMP_CNT = #{korPartcptCompCnt},</if>
+			<if test="korPartcptSpceCnt != null">KOR_PARTCPT_SPCE_CNT = #{korPartcptSpceCnt},</if>
+			<if test="korPartcptScaleNum != null">KOR_PARTCPT_SCALE_NUM = #{korPartcptScaleNum},</if>
+			<if test="placeInfo != null">PLACE_INFO = #{placeInfo},</if>
+		    <if test="updateUserId != null">UPDATE_USER_ID=#{updateUserId},</if>
+		    <if test="updateUserId != null">UPDATE_USER_DT=NOW()</if>
+	    </set>
+	    WHERE INSTT_MBER_CD = #{insttMberCd}
+	      AND EXBI_CD = #{exbiCd}
+	</update>
+	
+	<update id="UpdateSuppBizManageExbiFile" parameterType="hashMap">
+	    UPDATE EXBI_REGIST_FILE_INFO
+	    <set>
+			<if test="exbiPhotoFileNm1 != null">EXBI_PHOTO_FILE_NM1=#{exbiPhotoFileNm1},</if>
+			<if test="exbiPhotoFilePath1 != null">EXBI_PHOTO_FILE_PATH1=#{exbiPhotoFilePath1},</if>
+			<if test="exbiPhotoFileNm2 != null">EXBI_PHOTO_FILE_NM2=#{exbiPhotoFileNm2},</if> 
+			<if test="exbiPhotoFilePath2 != null">EXBI_PHOTO_FILE_PATH2=#{exbiPhotoFilePath2},</if>
+			<if test="exbiPhotoFileNm3 != null">EXBI_PHOTO_FILE_NM3=#{exbiPhotoFileNm3},</if> 
+			<if test="exbiPhotoFilePath3 != null">EXBI_PHOTO_FILE_PATH3=#{exbiPhotoFilePath3},</if> 
+			<if test="opmtAcmsltImageFileNm != null">OPMT_ACMSLT_IMAGE_FILE_NM=#{opmtAcmsltImageFileNm},</if>
+			<if test="opmtAcmsltImageFilePath != null">OPMT_ACMSLT_IMAGE_FILE_PATH=#{opmtAcmsltImageFilePath},</if> 
+			<if test="opmtAcmsltDocFileNm != null">OPMT_ACMSLT_DOC_FILE_NM=#{opmtAcmsltDocFileNm},</if>
+			<if test="opmtAcmsltDocFilePath != null">OPMT_ACMSLT_DOC_FILE_PATH=#{opmtAcmsltDocFilePath},</if> 
+			<if test="partcptAcmsltDocFileNm != null">PARTCPT_ACMSLT_DOC_FILE_NM=#{partcptAcmsltDocFileNm},</if>
+			<if test="partcptAcmsltDocFilePath != null">PARTCPT_ACMSLT_DOC_FILE_NM=#{partcptAcmsltDocFilePath},</if> 
+			<if test="opmtAcmsltImageFileNm2 != null">OPMT_ACMSLT_IMAGE_FILE_NM2=#{opmtAcmsltImageFileNm2},</if>
+			<if test="opmtAcmsltImageFilePath2 != null">OPMT_ACMSLT_IMAGE_FILE_PATH2=#{opmtAcmsltImageFilePath2},</if> 
+			<if test="opmtAcmsltImageFileNm3 != null">OPMT_ACMSLT_IMAGE_FILE_NM3=#{opmtAcmsltImageFileNm3},</if>
+			<if test="opmtAcmsltImageFilePath3 != null">OPMT_ACMSLT_IMAGE_FILE_PATH3=#{opmtAcmsltImageFilePath3},</if> 
+			<if test="opmtAcmsltImageFileNm4 != null">OPMT_ACMSLT_IMAGE_FILE_NM4=#{opmtAcmsltImageFileNm4},</if>
+			<if test="opmtAcmsltImageFilePath4 != null">OPMT_ACMSLT_IMAGE_FILE_PATH4=#{opmtAcmsltImageFilePath4},</if> 
+			<if test="attcheFileNm != null">ATTCHE_FILE_NM=#{attcheFileNm},</if> 
+			<if test="attcheFilePath2 != null">ATTCHE_FILE_PATH2=#{attcheFilePath2},</if>
+			<if test="attcheFileNm2 != null">ATTCHE_FILE_NM2=#{attcheFileNm2},</if> 
+			<if test="attcheFilePath != null">ATTCHE_FILE_PATH=#{attcheFilePath},</if> 
+			<if test="partcptAcmImageFilePath2 != null">PARTCPT_ACM_IMAGE_FILE_PATH2=#{partcptAcmImageFilePath2},</if>
+			<if test="partcptAcmImageFileNm3 != null">PARTCPT_ACM_IMAGE_FILE_NM3=#{partcptAcmImageFileNm3},</if> 
+			<if test="partcptAcmImageFilePath3 != null">PARTCPT_ACM_IMAGE_FILE_PATH3=#{partcptAcmImageFilePath3},</if>
+			<if test="partcptAcmImageFileNm4 != null">PARTCPT_ACM_IMAGE_FILE_NM4=#{partcptAcmImageFileNm4},</if> 
+			<if test="partcptAcmImageFilePath4 != null">PARTCPT_ACM_IMAGE_FILE_PATH4=#{partcptAcmImageFilePath4},</if>
+			<if test="partcptAcmImageFileNm2 != null">PARTCPT_ACM_IMAGE_FILE_NM2=#{partcptAcmImageFileNm2},</if> 
+			<if test="partcptAcmImageFilePath1 != null">PARTCPT_ACM_IMAGE_FILE_PATH1=#{partcptAcmImageFilePath1},</if>
+			<if test="partcptAcmImageFileNm1 != null">PARTCPT_ACM_IMAGE_FILE_NM1=#{partcptAcmImageFileNm1},</if> 
+			<if test="attcheFileNm3 != null">ATTCHE_FILE_NM3=#{attcheFileNm3},</if> 
+			<if test="attcheFilePath3 != null">ATTCHE_FILE_PATH3=#{attcheFilePath3},</if>
+			<if test="floorPlanFileNm != null">FLOOR_PLAN_FILE_NM=#{floorPlanFileNm},</if> 
+			<if test="floorPlanPath != null">FLOOR_PLAN_PATH=#{floorPlanPath},</if>	      
+		    <if test="updateUserId != null">UPDATE_USER_ID=#{updateUserId},</if>
+		    <if test="updateUserId != null">UPDATE_USER_DT=NOW()</if>
+	    </set>
+	    WHERE INSTT_MBER_CD = #{insttMberCd}
+	      AND EXBI_CD = #{exbiCd}
+	</update>
+
+	<update id="DeleteSuppBizManageExbiFile" parameterType="showVO">
+	    UPDATE EXBI_REGIST_FILE_INFO
+	    SET ${tmp1} = NULL, ${tmp2} = NULL
+	    WHERE INSTT_MBER_CD = #{insttMberCd}
+	      AND EXBI_CD = #{exbiCd}
+	</update>
+	
+	<!-- 전시상담포털 > MyDesk > 지원사업관리 : 상담사업 입력 -->
+	<insert id="InsertSuppBizManageCnslt" parameterType="showVO">
+		<selectKey resultType="String" keyProperty="cnsltexhbCd" order="BEFORE">
+		select cast(IFNULL(MAX(CNSLTEXHB_CD),cast(concat('1',DATE_FORMAT(NOW(), "%Y"),'000') as unsigned ))+1 as char)  CNSLTEXHB_CD
+		      FROM  CNSLTEXHB_REGIST_INFO
+		      WHERE CNSLTEXHB_CD LIKE concat('1',cast(DATE_FORMAT(NOW(), "%Y") as char),'%')
+		</selectKey>
+	    INSERT INTO CNSLTEXHB_REGIST_INFO (INSTT_MBER_CD, CNSLTEXHB_CD, CNSLTEXHB_GB, EVENT_NM,
+	      EVENT_BEGIN_DE, EVENT_CLOS_DE, RCEPT_BEGIN_DE, RCEPT_CLOS_DE, PLACE, SUPRT_INSTT, MAIN_CN,
+	      SPORT_CN, CHARGER_NM, CHARGER_TLPHON, CHARGER_FAX, CHARGER_EMAIL, SLCTN_AT, PROGRS_STTUS,
+	      INSERT_USER_ID, UPDATE_USER_DT, UPDATE_USER_ID, INSERT_USER_DT, PRE_CNSLTEXHB_CD,
+	      MATCHING_CMPL_YN, MNGE_INSTT, PREV_YEAR_CNSLT_SUM, PREV_YEAR_COMP_ENTER, CNSLT_CHARGER_DEPT,
+	      CNSLT_CHARGER_OFCPS, DOM_PREV_YEAR_COMP_ENTER, OLD_YN, RESULT_ETC, CNSLT_CNT,
+	      CNTRCT_PRTN_AFTER_AMT_SUM, CNSLT_AMT_SUM)
+	    values (#{insttMberCd}, #{cnsltexhbCd}, '1', #{eventNm},
+	      #{eventBeginDe}, #{eventClosDe}, #{rceptBeginDe}, #{rceptClosDe},
+	      #{place}, #{suprtInstt}, #{mainCn}, #{sportCn},
+	      #{chargerNm}, #{chargerTlphon}, #{chargerFax}, #{chargerEmail},
+	      #{slctnAt}, '0', #{insertUserId}, NOW(), #{updateUserId}, NOW(), #{preCnsltexhbCd},
+	      #{matchingCmplYn}, #{mngeInstt}, #{prevYearCnsltSum},
+	      #{prevYearCompEnter}, #{cnsltChargerDept}, #{cnsltChargerOfcps},
+	      #{domPrevYearCompEnter}, #{oldYn}, #{resultEtc}, #{cnsltCnt},
+	      #{cntrctPrtnAfterAmtSum}, #{cnsltAmtSum})
+  	</insert>
+  	
+ 	<insert id="InsertSuppBizManageCnsltFile" parameterType="showVO">
+	INSERT INTO CNSLTEXHB_REGIST_FILE_INFO (INSTT_MBER_CD, CNSLTEXHB_CD, INSERT_USER_ID, UPDATE_USER_DT, UPDATE_USER_ID, INSERT_USER_DT)
+	VALUES(#{insttMberCd}, #{cnsltexhbCd}, #{insertUserId}, #{updateUserDt}, #{updateUserId}, #{insertUserDt})
+	</insert>
+	
+	<!-- 전시상담포털 > MyDesk > 지원사업관리 : 상담사업 업데이트 -->
+	<update id="UpdateSuppBizManageCnslt" parameterType="showVO">
+	    UPDATE CNSLTEXHB_REGIST_INFO
+	    <set>
+			<if test="cnsltexhbGb != null">CNSLTEXHB_GB = #{cnsltexhbGb},</if>
+			<if test="eventNm != null">EVENT_NM = #{eventNm},</if>
+			<if test="eventBeginDe != null">EVENT_BEGIN_DE = #{eventBeginDe},</if>
+			<if test="eventClosDe != null">EVENT_CLOS_DE = #{eventClosDe},</if>
+			<if test="rceptBeginDe != null">RCEPT_BEGIN_DE = #{rceptBeginDe},</if>
+			<if test="rceptClosDe != null">RCEPT_CLOS_DE = #{rceptClosDe},</if>
+			<if test="place != null">PLACE = #{place},</if>
+			<if test="suprtInstt != null">SUPRT_INSTT = #{suprtInstt},</if>
+			<if test="mainCn != null">MAIN_CN = #{mainCn},</if>
+			<if test="sportCn != null">SPORT_CN = #{sportCn},</if>
+			<if test="chargerNm != null">CHARGER_NM = #{chargerNm},</if>
+			<if test="chargerTlphon != null">CHARGER_TLPHON = #{chargerTlphon},</if>
+			<if test="chargerFax != null">CHARGER_FAX = #{chargerFax},</if>
+			<if test="chargerEmail != null">CHARGER_EMAIL = #{chargerEmail},</if>
+			<if test="slctnAt != null">SLCTN_AT = #{slctnAt},</if>
+			<if test="progrsSttus != null">PROGRS_STTUS = #{progrsSttus},</if>
+			<if test="preCnsltexhbCd != null">PRE_CNSLTEXHB_CD = #{preCnsltexhbCd},</if>
+			<if test="matchingCmplYn != null">MATCHING_CMPL_YN = #{matchingCmplYn},</if>
+			<if test="mngeInstt != null">MNGE_INSTT = #{mngeInstt},</if>
+			<if test="prevYearCnsltSum != null">PREV_YEAR_CNSLT_SUM = #{prevYearCnsltSum},</if>
+			<if test="prevYearCompEnter != null">PREV_YEAR_COMP_ENTER = #{prevYearCompEnter},</if>
+			<if test="cnsltChargerDept != null">CNSLT_CHARGER_DEPT = #{cnsltChargerDept},</if>
+			<if test="cnsltChargerOfcps != null">CNSLT_CHARGER_OFCPS = #{cnsltChargerOfcps},</if>
+			<if test="domPrevYearCompEnter != null">DOM_PREV_YEAR_COMP_ENTER = #{domPrevYearCompEnter},</if>
+			<if test="oldYn != null">OLD_YN = #{oldYn},</if>
+			<if test="resultEtc != null">RESULT_ETC = #{resultEtc},</if>
+			<if test="cnsltCnt != null">CNSLT_CNT = #{cnsltCnt},</if>
+			<if test="cntrctPrtnAfterAmtSum != null">CNTRCT_PRTN_AFTER_AMT_SUM = #{cntrctPrtnAfterAmtSum},</if>
+			<if test="cnsltAmtSum != null">CNSLT_AMT_SUM = #{cnsltAmtSum},</if>
+			<if test="cnsltChargerDept != null">CNSLT_CHARGER_DEPT = #{cnsltChargerDept},</if>
+			<if test="cnsltChargerOfcps != null">CNSLT_CHARGER_OFCPS = #{cnsltChargerOfcps},</if>
+		    <if test="updateUserId != null">UPDATE_USER_ID=#{updateUserId},</if>
+		    <if test="updateUserId != null">UPDATE_USER_DT=NOW()</if>
+	    </set>
+	    WHERE INSTT_MBER_CD = #{insttMberCd}
+	      AND CNSLTEXHB_CD = #{cnsltexhbCd}
+	</update>
+	
+	<update id="UpdateSuppBizManageCnsltFile" parameterType="hashMap">
+	    UPDATE CNSLTEXHB_REGIST_FILE_INFO
+	    <set>
+			<if test="cnsltexhbPhotoFileNm1 != null">CNSLTEXHB_PHOTO_FILE_NM1=#{cnsltexhbPhotoFileNm1},</if>
+			<if test="cnsltexhbPhotoFileCours1 != null">CNSLTEXHB_PHOTO_FILE_COURS1=#{cnsltexhbPhotoFileCours1},</if>
+			<if test="cnsltexhbPhotoFileNm2 != null">CNSLTEXHB_PHOTO_FILE_NM2=#{cnsltexhbPhotoFileNm2},</if>
+			<if test="cnsltexhbPhotoFileCours2 != null">CNSLTEXHB_PHOTO_FILE_COURS2=#{cnsltexhbPhotoFileCours2},</if>
+			<if test="cnsltexhbPhotoFileNm3 != null">CNSLTEXHB_PHOTO_FILE_NM3=#{cnsltexhbPhotoFileNm3},</if>
+			<if test="cnsltexhbPhotoFileCours3 != null">CNSLTEXHB_PHOTO_FILE_COURS3=#{cnsltexhbPhotoFileCours3},</if>
+			<if test="cnsltexhbAttchFileNm1 != null">CNSLTEXHB_ATTCH_FILE_NM1=#{cnsltexhbAttchFileNm1},</if>
+			<if test="cnsltexhbAttchFileCours1 != null">CNSLTEXHB_ATTCH_FILE_COURS1=#{cnsltexhbAttchFileCours1},</if>
+			<if test="cnsltexhbPhotoFileNm4 != null">CNSLTEXHB_PHOTO_FILE_NM4=#{cnsltexhbPhotoFileNm4},</if>
+			<if test="cnsltexhbPhotoFileCours4 != null">CNSLTEXHB_PHOTO_FILE_COURS4=#{cnsltexhbPhotoFileCours4},</if>
+			<if test="cnsltexhbAttchFileNm2 != null">CNSLTEXHB_ATTCH_FILE_NM2=#{cnsltexhbAttchFileNm2},</if>
+			<if test="cnsltexhbAttchFileCours2 != null">CNSLTEXHB_ATTCH_FILE_COURS2=#{cnsltexhbAttchFileCours2},</if>
+			<if test="cnsltexhbAttchFileNm3 != null">CNSLTEXHB_ATTCH_FILE_NM3=#{cnsltexhbAttchFileNm3},</if>
+			<if test="cnsltexhbAttchFileCours3 != null">CNSLTEXHB_ATTCH_FILE_COURS3=#{cnsltexhbAttchFileCours3},</if>
+		    <if test="updateUserId != null">UPDATE_USER_ID=#{updateUserId},</if>
+		    <if test="updateUserId != null">UPDATE_USER_DT=NOW()</if>
+	    </set>
+	    WHERE INSTT_MBER_CD = #{insttMberCd}
+	      AND CNSLTEXHB_CD = #{cnsltexhbCd}
+	</update>
+
+	<update id="DeleteSuppBizManageCnsltFile" parameterType="showVO">
+	    UPDATE CNSLTEXHB_REGIST_FILE_INFO
+	    SET ${tmp1} = NULL, ${tmp2} = NULL
+	    WHERE INSTT_MBER_CD = #{insttMberCd}
+	      AND CNSLTEXHB_CD = #{cnsltexhbCd}
+	</update>
+	
+	<select id="SelectExbiByMove" parameterType="showVO" resultType="showVO">
+		SELECT 
+			CASE WHEN A.KOR_PARTCPT_SCALE_NUM IS NULL THEN (IFNULL(A.SPCE_BY_MG,0) * B.EXBI_SPCE_SUM) ELSE A.KOR_PARTCPT_SCALE_NUM END AS KOR_PARTCPT_SCALE_NUM 
+			,CASE WHEN A.KOR_PARTCPT_COMP_CNT IS NULL THEN B.EXBI_COMP_CNT ELSE A.KOR_PARTCPT_COMP_CNT END  KOR_PARTCPT_COMP_CNT
+			,CASE WHEN A.KOR_PARTCPT_SPCE_CNT IS NULL THEN B.EXBI_SPCE_SUM ELSE A.KOR_PARTCPT_SPCE_CNT END  KOR_PARTCPT_SPCE_CNT
+			,C.FLOOR_PLAN_FILE_NM
+			,C.FLOOR_PLAN_PATH
+			,A.* 
+		FROM EXBI_REGIST_INFO A
+			LEFT JOIN (
+			select EXBI_CD , count(*) AS EXBI_COMP_CNT, SUM(REQST_SPCE_CO) AS EXBI_SPCE_SUM from EXBI_REQST_INFO
+			GROUP BY EXBI_CD
+			) B 
+			ON A.EXBI_CD = B.EXBI_CD
+			LEFT JOIN EXBI_REGIST_FILE_INFO C
+			ON A.INSTT_MBER_CD = C.INSTT_MBER_CD
+			AND A.EXBI_CD = C.EXBI_CD
+		WHERE A.EXBI_CD = #{exbiCd}
+	</select>
+	
+	<select id="SelectCnsltByMove" parameterType="showVO" resultType="showVO">
+		SELECT 
+			CASE WHEN A.CNSLT_CNT IS NULL THEN B.CNSLT_CNT ELSE A.CNSLT_CNT END  CNSLT_CNT 
+			,CASE WHEN A.CNSLT_AMT_SUM IS NULL THEN B.CNSLT_AMT_SUM ELSE A.CNSLT_AMT_SUM END  CNSLT_AMT_SUM
+			,CASE WHEN A.CNTRCT_PRTN_AFTER_AMT_SUM IS NULL THEN B.CNTRCT_PRTN_AFTER_AMT_SUM ELSE A.CNTRCT_PRTN_AFTER_AMT_SUM END  CNTRCT_PRTN_AFTER_AMT_SUM
+			,C.CNSLT_COMP_CNT
+			,D.CNSLT_BUYER_CNT
+			,A.* 
+		FROM CNSLTEXHB_REGIST_INFO A
+			left outer JOIN ( select CNSLTEXHB_CD, count(*) AS CNSLT_CNT, SUM(CNSLT_AMT) AS CNSLT_AMT_SUM ,SUM(CNTRCT_PRTN_AFTER_AMT) AS CNTRCT_PRTN_AFTER_AMT_SUM  from CNSLTEXHB_RSLT_INFO
+			GROUP BY CNSLTEXHB_CD ) B
+			ON A.CNSLTEXHB_CD = B.CNSLTEXHB_CD
+			left outer JOIN ( select CNSLTEXHB_CD, count(*) AS CNSLT_COMP_CNT from CNSLTEXHB_REQST_INFO
+			GROUP BY CNSLTEXHB_CD ) C
+			ON A.CNSLTEXHB_CD = C.CNSLTEXHB_CD
+			left outer JOIN ( select CNSLTEXHB_CD, count(*) AS CNSLT_BUYER_CNT from BUYER_LSN_INFO
+			GROUP BY CNSLTEXHB_CD ) D
+			ON A.CNSLTEXHB_CD = D.CNSLTEXHB_CD
+		WHERE A.CNSLTEXHB_CD = #{cnsltexhbCd}
+	</select>
+	
+
+	<!-- 전시상담포털 > MyDesk > 참가업체관리 : GUBUN = 0 -->
+	<select id="SelectExbiReqCompanyList" parameterType="showVO" resultType="showVO">
+		SELECT
+			'0' AS GUBUN, ERI.EXBI_CD AS code, ERI. * , ERFI. * , 
+			MI.RPRSNTV, MI.RPRSNTV_ENG, MI.TELNO, MI.FAX, MI.REPRSNT_EMAIL, MI.CHARGER_NM, MI.CHARGER_NM_ENG, MI.CHARGER_DEPT, MI.CHARGER_DEPT_ENG, 
+			MI.CHARGER_OFCPS, MI.CHARGER_OFCPS_ENG, MI.CHARGER_TLPHON, MI.CHARGER_EMAIL, MI.SBSCRB_CONFM_YN, MI.FILE_NM, MI.FILE_COURS, MI.CMPNY_NM, 
+			MI.CMPNY_NM_ENG, MI.LOCPLC, MI.LOCPLC_ENG, MI.FOND_DE, MI.EMPLY_CO, MI.BEFORE_YEAR_SALAMT, MI.BEFORE_YEAR_XPORT_ACMSLT, 
+			MI.HMPG, CONCAT('http://' , REPLACE(HMPG, 'http://', '')) AS HMPG_URL, MI.MFCRTR_YN, MI.SMLPZ_YN, MI.MAIN_PRDUCT, MI.MAIN_PRDUCT_ENG, 
+			MI.PATENT_CRTFC, MI.PATENT_CRTFC_ENG, MI.MAIN_BCNC, MI.MAIN_BCNC_ENG, MI.INSTT_NM, MI.INSTT_NM_ENG, MI.MAIN_SKLL, MI.MAIN_SKLL_ENG, 
+			MI.ETC_MATTER, MI.POST_CODE1, MI.POST_CODE2, MI.FILE_NM2, MI.FILE_COURS2, MI.ADD_PRDUCT, MI.ADD_PRDUCT_ENG, MI.BIZ_NUM, 
+			CASE WHEN E.PROGRS_STTUS = '0' AND E.SLCTN_YN = 'N' THEN 'M'
+			WHEN E.PROGRS_STTUS = '0' AND E.SLCTN_YN = 'Y' THEN 'A'
+			WHEN E.PROGRS_STTUS = '4' THEN 'ER'
+			WHEN E.PROGRS_STTUS = '5' THEN 'AR'
+			ELSE '' 
+		      END BUTTON_STAT, 
+			E.SPCE_BY_UNIT,  E.SPCE_BY_MG, E.PROGRS_STTUS
+		FROM
+		    EXBI_REQST_INFO ERI 
+		    JOIN MBER_INFO MI
+		        ON ERI.ENTRPRS_MBER_CD = MI.MBER_CD
+		    JOIN EXBI_REGIST_INFO E
+		       ON ERI.EXBI_CD = E.EXBI_CD
+		    JOIN EXBI_REQST_FILE_INFO ERFI
+		    	ON ERI.INSTT_MBER_CD = ERFI.INSTT_MBER_CD
+		    	AND ERI.EXBI_CD = ERFI.EXBI_CD
+		    	AND ERI.ENTRPRS_MBER_CD = ERFI.ENTRPRS_MBER_CD
+		WHERE 1=1
+		<if test="code != null and code != ''">
+		    AND ERI.EXBI_CD = #{code}
+		</if>
+		<if test="insttMberCd != null and insttMberCd != ''">
+			AND ERI.INSTT_MBER_CD = #{insttMberCd}
+		</if>
+		<if test="cmpnyNm != null and cmpnyNm != ''">
+			AND MI.CMPNY_NM LIKE '%${cmpnyNm}%'
+		</if>
+		LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+
+	<select id="SelectExbiReqCompanyListTotCnt" parameterType="showVO" resultType="int">
+		SELECT COUNT(*) cnt
+		FROM
+		    EXBI_REQST_INFO ERI 
+		    JOIN MBER_INFO MI
+		        ON ERI.ENTRPRS_MBER_CD = MI.MBER_CD
+		    JOIN EXBI_REGIST_INFO E
+		       ON ERI.EXBI_CD = E.EXBI_CD
+		    JOIN EXBI_REQST_FILE_INFO ERFI
+		    	ON ERI.INSTT_MBER_CD = ERFI.INSTT_MBER_CD
+		    	AND ERI.EXBI_CD = ERFI.EXBI_CD
+		    	AND ERI.ENTRPRS_MBER_CD = ERFI.ENTRPRS_MBER_CD
+		WHERE 1=1
+		<if test="code != null and code != ''">
+		    AND ERI.EXBI_CD = #{code}
+		</if>
+		<if test="insttMberCd != null and insttMberCd != ''">
+			AND ERI.INSTT_MBER_CD = #{insttMberCd}
+		</if>
+		<if test="cmpnyNm != null and cmpnyNm != ''">
+			AND MI.CMPNY_NM LIKE '%${cmpnyNm}%'
+		</if>
+	</select>
+
+	<!-- 전시상담포털 > MyDesk > 참가업체관리 : GUBUN != 0 -->
+	<select id="SelectCnsltReqCompanyList" parameterType="showVO" resultType="showVO">
+		SELECT
+			'1' AS GUBUN, CRI.CNSLTEXHB_CD AS code, CRI. * , CRFI. * , 
+			MI.RPRSNTV, MI.RPRSNTV_ENG, MI.TELNO, MI.FAX, MI.REPRSNT_EMAIL, MI.CHARGER_NM, MI.CHARGER_NM_ENG, MI.CHARGER_DEPT, MI.CHARGER_DEPT_ENG, 
+			MI.CHARGER_OFCPS, MI.CHARGER_OFCPS_ENG, MI.CHARGER_TLPHON, MI.CHARGER_EMAIL, MI.SBSCRB_CONFM_YN, MI.FILE_NM, MI.FILE_COURS, MI.CMPNY_NM, MI.CMPNY_NM_ENG, 
+			MI.LOCPLC, MI.LOCPLC_ENG, MI.FOND_DE, MI.EMPLY_CO, MI.BEFORE_YEAR_SALAMT, MI.BEFORE_YEAR_XPORT_ACMSLT, 
+			MI.HMPG, CONCAT('http://' , REPLACE(HMPG, 'http://', '')) AS HMPG_URL, MI.MFCRTR_YN, MI.SMLPZ_YN, MI.MAIN_PRDUCT, MI.MAIN_PRDUCT_ENG, 
+			MI.PATENT_CRTFC, MI.PATENT_CRTFC_ENG,  MI.MAIN_BCNC, MI.MAIN_BCNC_ENG, MI.INSTT_NM, MI.INSTT_NM_ENG, MI.MAIN_SKLL, MI.MAIN_SKLL_ENG, 
+			MI.ETC_MATTER, MI.POST_CODE1, MI.POST_CODE2, MI.FILE_NM2, MI.FILE_COURS2, MI.ADD_PRDUCT, MI.ADD_PRDUCT_ENG, MI.BIZ_NUM, C.PROGRS_STTUS,
+			CASE WHEN C.PROGRS_STTUS = '0' AND C.SLCTN_AT = 'N' THEN 'M'
+	              	WHEN C.PROGRS_STTUS = '0' AND C.SLCTN_AT = 'Y' THEN 'A'
+	              	WHEN C.PROGRS_STTUS = '4' THEN 'ER'
+	              	WHEN C.PROGRS_STTUS = '5' THEN 'AR'
+	              	ELSE '' 
+	          END BUTTON_STAT
+		FROM
+		    CNSLTEXHB_REQST_INFO CRI 
+		    JOIN MBER_INFO MI
+		        ON CRI.ENTRPRS_MBER_CD = MI.MBER_CD
+		    JOIN CNSLTEXHB_REGIST_INFO C
+		       ON CRI.CNSLTEXHB_CD = C.CNSLTEXHB_CD
+		    LEFT JOIN CNSLTEXHB_REQST_FILE_INFO CRFI
+		    	ON CRI.INSTT_MBER_CD = CRFI.INSTT_MBER_CD
+		    	AND CRI.CNSLTEXHB_CD = CRFI.CNSLTEXHB_CD
+		    	AND CRI.ENTRPRS_MBER_CD = CRFI.ENTRPRS_MBER_CD
+		WHERE 1=1
+		<if test="code != null and code != ''">
+		    AND CRI.CNSLTEXHB_CD = #{code}
+		</if>
+		<if test="insttMberCd != null and insttMberCd != ''">
+			AND CRI.INSTT_MBER_CD = #{insttMberCd}
+		</if>
+		<if test="cmpnyNm != null and cmpnyNm != ''">
+			AND MI.CMPNY_NM LIKE '%${cmpnyNm}%'
+		</if>
+		<if test="slctnYn != null and slctnYn != ''">
+			AND CRI.SLCTN_YN = #{slctnYn}
+		</if>
+		LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+
+	<select id="SelectCnsltReqCompanyListTotCnt" parameterType="showVO" resultType="int">
+		SELECT COUNT(*) cnt
+		FROM
+		    CNSLTEXHB_REQST_INFO CRI 
+		    JOIN MBER_INFO MI
+		        ON CRI.ENTRPRS_MBER_CD = MI.MBER_CD
+		    JOIN CNSLTEXHB_REGIST_INFO C
+		       ON CRI.CNSLTEXHB_CD = C.CNSLTEXHB_CD
+		    LEFT JOIN CNSLTEXHB_REQST_FILE_INFO CRFI
+		    	ON CRI.INSTT_MBER_CD = CRFI.INSTT_MBER_CD
+		    	AND CRI.CNSLTEXHB_CD = CRFI.CNSLTEXHB_CD
+		    	AND CRI.ENTRPRS_MBER_CD = CRFI.ENTRPRS_MBER_CD
+		WHERE 1=1
+		<if test="code != null and code != ''">
+		    AND CRI.CNSLTEXHB_CD = #{code}
+		</if>
+		<if test="insttMberCd != null and insttMberCd != ''">
+			AND CRI.INSTT_MBER_CD = #{insttMberCd}
+		</if>
+		<if test="cmpnyNm != null and cmpnyNm != ''">
+			AND MI.CMPNY_NM LIKE '%${cmpnyNm}%'
+		</if>
+		<if test="slctnYn != null and slctnYn != ''">
+			AND CRI.SLCTN_YN = #{slctnYn}
+		</if>
+	</select>
+	
+	<!-- 전시상담포털 > MyDesk > 참가업체관리 : 승인 업데이트 -->
+	<update id="UpdateSlctnYn" parameterType="showVO">
+		<choose>
+			<when test="gubun == 0">
+				UPDATE EXBI_REQST_INFO
+				 SET SLCTN_YN = #{data}
+			    WHERE  EXBI_CD = #{code}
+			      AND ENTRPRS_MBER_CD = #{entrprsMberCd}
+			</when>
+			<when test="gubun == 1">
+				UPDATE CNSLTEXHB_REQST_INFO
+				 SET SLCTN_YN = #{data}
+			    WHERE CNSLTEXHB_CD = #{code}
+			      AND ENTRPRS_MBER_CD = #{entrprsMberCd}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</update> 	
+	
+	<!-- 전시상담포털 > MyDesk > 참가업체관리 : 선정완료 -->
+	<update id="UpdateWinCmpl" parameterType="showVO">
+		<if test="gubun == 0">
+			UPDATE EXBI_REGIST_INFO 
+		    SET SELECT_CMPL = 'Y' 
+		    WHERE  EXBI_CD = #{code}
+		    AND INSTT_MBER_CD = #{insttMberCd}
+		</if>
+		<if test="gubun == 1">
+			UPDATE CNSLTEXHB_REGIST_INFO 
+		    SET SELECT_CMPL = 'Y' 
+		    WHERE  CNSLTEXHB_CD = #{code}
+		    AND INSTT_MBER_CD = #{insttMberCd}
+		</if>
+	</update>
+	
+	<!-- 전시상담포털 > MyDesk > 입찰신청관리 -->
+	<select id="SelectReqBiddingOthersList" parameterType="showVO" resultType="showVO">
+		SELECT * 
+			  FROM (
+					SELECT A.REGIST_NO, A.BBSCTT_NO, A.MBER_CD, A.BSNM_RSCTFT_FILE_NM, A.BSNM_RSCTFT_FILE_PATH, A.BIDDING_FILE_NM, 
+							A.BIDDING_FILE_PATH, A.ETC_FILE_NM, A.ETC_FILE_PATH, A.BIDDING_STATUS, 
+							( SELECT CD_KOR FROM CODEBOOK WHERE CD_DEC = 'BIDDING_STATUS' AND CD_ITEM = A.BIDDING_STATUS ) BIDDING_STATUS_NM, 
+							( SELECT CD_REF1 FROM CODEBOOK WHERE CD_DEC = 'BIDDING_STATUS' AND CD_ITEM = A.BIDDING_STATUS ) BIDDING_STATUS_CSS,
+							A.INSERT_USER_ID, DATE_FORMAT(A.INSERT_USER_DT, '%Y-%m-%d') REGIST_DATE, A.INSERT_USER_DT, A.UPDATE_USER_ID, A.UPDATE_USER_DT,
+							B.BBS_TY, B.SJ, B.CN, B.EVENT_GB, B.EVENT_CD, B.WRTER, B.WRITNG_DE, B.ATCH_FILE_NM, B.ATCH_FILE_COURS, B.ATCH_FILE_NM2,
+							B.ATCH_FILE_COURS2, B.ATCH_FILE_NM3, B.ATCH_FILE_COURS3, B.ETC1, B.ETC2, B.ETC3, B.ETC4, B.ETC5,
+							DATE_FORMAT(STR_TO_DATE(B.ETC4, '%Y%m%d') , '%Y-%m-%d') AS TO_DATE, 
+							CASE 
+								WHEN B.EVENT_GB = '0' THEN (SELECT CONCAT('[전시] ' , EXBI_NM) FROM EXBI_REGIST_INFO WHERE EXBI_CD = B.EVENT_CD)
+								WHEN B.EVENT_GB = '1' THEN (SELECT CONCAT('[상담] ' , EVENT_NM) FROM CNSLTEXHB_REGIST_INFO WHERE CNSLTEXHB_CD = B.EVENT_CD)
+								ELSE ''
+							END EVENT_NM,
+							DATE_FORMAT(B.INSERT_USER_DT, '%Y-%m-%d') FROM_DATE, C.SSBYP, C.ID, C.RPRSNTV, C.RPRSNTV_ENG, C.TELNO, C.FAX, C.REPRSNT_EMAIL,
+							C.CHARGER_NM, C.CHARGER_NM_ENG, C.CHARGER_DEPT, C.CHARGER_DEPT_ENG, C.CHARGER_OFCPS, C.CHARGER_OFCPS_ENG, C.CHARGER_TLPHON,
+							C.CHARGER_EMAIL, C.SBSCRB_CONFM_YN, C.FILE_NM, C.FILE_COURS, C.CMPNY_NM, C.CMPNY_NM_ENG, C.LOCPLC, C.LOCPLC_ENG, C.FOND_DE,
+							C.EMPLY_CO, C.BEFORE_YEAR_SALAMT, C.BEFORE_YEAR_XPORT_ACMSLT, C.HMPG, C.MFCRTR_YN, C.SMLPZ_YN, C.MAIN_PRDUCT, C.MAIN_PRDUCT_ENG,
+							C.PATENT_CRTFC, C.PATENT_CRTFC_ENG, C.MAIN_BCNC, C.MAIN_BCNC_ENG, C.INSTT_NM, C.INSTT_NM_ENG, C.MAIN_SKLL, C.MAIN_SKLL_ENG,
+							C.ETC_MATTER, C.POST_CODE1, C.POST_CODE2, C.FILE_NM2, C.FILE_COURS2, C.ADD_PRDUCT, C.ADD_PRDUCT_ENG, C.BIZ_NUM, C.SSBYP_GB,
+							C.FILE_NM3, C.FILE_COURS3, C.COMP_LEVEL, C.UNION_COMP_YN, C.CHARGER_HP
+				  FROM BIDDING_REQST_INFO A
+				  JOIN ( SELECT * FROM BBS_CM WHERE BBS_TY = #{bbsTy} AND REGIST_NO = #{registNo} ) B
+					ON A.REGIST_NO = B.REGIST_NO
+				   AND A.BBSCTT_NO = B.BBSCTT_NO
+			 LEFT JOIN ( SELECT * FROM MBER_INFO WHERE SSBYP = '3' ) C
+					ON 	A.MBER_CD = C.MBER_CD 
+				ORDER BY A.INSERT_USER_DT ASC ) O
+				WHERE 1=1
+		<if test="cmpnyNm != null and cmpnyNm != ''">
+			AND O.CMPNY_NM LIKE '%${cmpnyNm}%'
+		</if>
+		ORDER BY INSERT_USER_DT DESC
+		LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+
+	<select id="SelectReqBiddingOthersListTotCnt" parameterType="showVO" resultType="int">
+		SELECT COUNT(*) cnt
+		FROM (
+				SELECT A.REGIST_NO, A.BBSCTT_NO, A.MBER_CD, A.BSNM_RSCTFT_FILE_NM, A.BSNM_RSCTFT_FILE_PATH, A.BIDDING_FILE_NM, 
+						A.BIDDING_FILE_PATH, A.ETC_FILE_NM, A.ETC_FILE_PATH, A.BIDDING_STATUS, 
+						( SELECT CD_KOR FROM CODEBOOK WHERE CD_DEC = 'BIDDING_STATUS' AND CD_ITEM = A.BIDDING_STATUS ) BIDDING_STATUS_NM, 
+						( SELECT CD_REF1 FROM CODEBOOK WHERE CD_DEC = 'BIDDING_STATUS' AND CD_ITEM = A.BIDDING_STATUS ) BIDDING_STATUS_CSS,
+						A.INSERT_USER_ID, DATE_FORMAT(A.INSERT_USER_DT, '%Y-%m-%d') REGIST_DATE, A.INSERT_USER_DT, A.UPDATE_USER_ID, A.UPDATE_USER_DT,
+						B.BBS_TY, B.SJ, B.CN, B.EVENT_GB, B.EVENT_CD, B.WRTER, B.WRITNG_DE, B.ATCH_FILE_NM, B.ATCH_FILE_COURS, B.ATCH_FILE_NM2,
+						B.ATCH_FILE_COURS2, B.ATCH_FILE_NM3, B.ATCH_FILE_COURS3, B.ETC1, B.ETC2, B.ETC3, B.ETC4, B.ETC5,
+						DATE_FORMAT(STR_TO_DATE(B.ETC4, '%Y%m%d') , '%Y-%m-%d') AS TO_DATE, 
+						CASE 
+							WHEN B.EVENT_GB = '0' THEN (SELECT CONCAT('[전시] ' , EXBI_NM) FROM EXBI_REGIST_INFO WHERE EXBI_CD = B.EVENT_CD)
+							WHEN B.EVENT_GB = '1' THEN (SELECT CONCAT('[상담] ' , EVENT_NM) FROM CNSLTEXHB_REGIST_INFO WHERE CNSLTEXHB_CD = B.EVENT_CD)
+							ELSE ''
+						END EVENT_NM,
+						DATE_FORMAT(B.INSERT_USER_DT, '%Y-%m-%d') FROM_DATE, C.SSBYP, C.ID, C.RPRSNTV, C.RPRSNTV_ENG, C.TELNO, C.FAX, C.REPRSNT_EMAIL,
+						C.CHARGER_NM, C.CHARGER_NM_ENG, C.CHARGER_DEPT, C.CHARGER_DEPT_ENG, C.CHARGER_OFCPS, C.CHARGER_OFCPS_ENG, C.CHARGER_TLPHON,
+						C.CHARGER_EMAIL, C.SBSCRB_CONFM_YN, C.FILE_NM, C.FILE_COURS, C.CMPNY_NM, C.CMPNY_NM_ENG, C.LOCPLC, C.LOCPLC_ENG, C.FOND_DE,
+						C.EMPLY_CO, C.BEFORE_YEAR_SALAMT, C.BEFORE_YEAR_XPORT_ACMSLT, C.HMPG, C.MFCRTR_YN, C.SMLPZ_YN, C.MAIN_PRDUCT, C.MAIN_PRDUCT_ENG,
+						C.PATENT_CRTFC, C.PATENT_CRTFC_ENG, C.MAIN_BCNC, C.MAIN_BCNC_ENG, C.INSTT_NM, C.INSTT_NM_ENG, C.MAIN_SKLL, C.MAIN_SKLL_ENG,
+						C.ETC_MATTER, C.POST_CODE1, C.POST_CODE2, C.FILE_NM2, C.FILE_COURS2, C.ADD_PRDUCT, C.ADD_PRDUCT_ENG, C.BIZ_NUM, C.SSBYP_GB,
+						C.FILE_NM3, C.FILE_COURS3, C.COMP_LEVEL, C.UNION_COMP_YN, C.CHARGER_HP
+			  FROM BIDDING_REQST_INFO A
+			  JOIN ( SELECT * FROM BBS_CM WHERE BBS_TY = #{bbsTy} AND REGIST_NO = #{registNo} ) B
+				ON A.REGIST_NO = B.REGIST_NO
+			   AND A.BBSCTT_NO = B.BBSCTT_NO
+		 LEFT JOIN ( SELECT * FROM MBER_INFO WHERE SSBYP = '3' ) C
+				ON 	A.MBER_CD = C.MBER_CD 
+			ORDER BY A.INSERT_USER_DT ASC ) O
+			WHERE 1=1
+		<if test="cmpnyNm != null and cmpnyNm != ''">
+			AND O.CMPNY_NM LIKE '%${cmpnyNm}%'
+		</if>
+	</select>
+	
+	<select id="SelectBiddingStatus" parameterType="showVO" resultType="showVO">
+		SELECT A.CD_ITEM, COALESCE(CNT, 0) CNT
+		  FROM (
+				SELECT CD_ITEM
+				  FROM CODEBOOK
+				 WHERE CD_DEC = 'BIDDING_STATUS'
+				 ) A
+		  LEFT JOIN (
+					SELECT BIDDING_STATUS, COUNT(*) CNT
+					  FROM BIDDING_REQST_INFO A
+					 WHERE 1 = 1
+					   AND REGIST_NO = #{registNo}
+					 GROUP BY BIDDING_STATUS   
+				 )	B
+		    ON A.CD_ITEM = B.BIDDING_STATUS
+	   ORDER BY CD_ITEM	
+	</select>
+	
+	<!-- 전시상담포털 > MyDesk > 입찰신청관리 : 승인 업데이트 -->
+	<update id="UpdateBiddingStatus" parameterType="showVO">
+		UPDATE BIDDING_REQST_INFO
+		SET   BIDDING_STATUS = #{biddingStatus}
+		WHERE REGIST_NO = #{registNo}
+		  AND BBSCTT_NO = #{bbscttNo}
+		  AND MBER_CD = #{mberCd}
+	</update> 
+
+	<!-- 전시상담포털 > MyDesk > 우수업체선정 : 선정업체 조회 -->
+	<select id="SelectBiddingStatusCompanyList" parameterType="showVO" resultType="showVO">
+		SELECT B.CMPNY_NM, B.MBER_CD
+		  FROM BIDDING_REQST_INFO A
+		   JOIN MBER_INFO B
+		     ON A.MBER_CD = B.MBER_CD
+		   AND REGIST_NO = #{registNo}
+		   AND A.BIDDING_STATUS = '1'
+	</select>
+
+	<!-- 전시상담포털 > MyDesk > 입찰신청관리 : 선정완료 -->
+	<update id="UpdateBiddingResultComplete" parameterType="showVO">
+		UPDATE BBS_CM
+		SET ETC2 = #{etc2}, ETC3 = #{etc3}, ETC1 = '완료'
+		WHERE BBS_TY = '2'
+		  AND REGIST_NO = #{registNo}
+	</update>
+
+	<!-- 전시상담포털 > MyDesk > 우수기업선정 -->
+	<select id="SelectReqBestCompOthersList" parameterType="showVO" resultType="showVO">
+		SELECT * 
+			  FROM (
+					SELECT A.*, B.BBS_TY, B.SJ, B.CN, B.EVENT_GB, B.EVENT_CD, B.WRTER, B.WRITNG_DE, B.ATCH_FILE_NM, B.ATCH_FILE_COURS,
+							B.ATCH_FILE_NM2, B.ATCH_FILE_COURS2, B.ATCH_FILE_NM3, B.ATCH_FILE_COURS3, B.ETC1, B.ETC2, B.ETC3, B.ETC4, B.ETC5,
+							DATE_FORMAT(STR_TO_DATE(B.ETC4, '%Y%m%d') , '%Y-%m-%d') AS TO_DATE, 
+							CASE 
+								WHEN B.EVENT_GB = '0' THEN (SELECT CONCAT('[전시] ' , EXBI_NM) FROM EXBI_REGIST_INFO WHERE EXBI_CD = B.EVENT_CD)
+								WHEN B.EVENT_GB = '1' THEN (SELECT CONCAT('[상담] ' , EVENT_NM) FROM CNSLTEXHB_REGIST_INFO WHERE CNSLTEXHB_CD = B.EVENT_CD)
+								ELSE ''
+							END EVENT_NM,
+							DATE_FORMAT(B.INSERT_USER_DT, '%Y-%m-%d') FROM_DATE, C.SSBYP, C.ID, C.SSBYP_GB, C.TELNO
+				  FROM WINNER_REQST_INFO A 
+				  JOIN ( SELECT * FROM BBS_CM WHERE BBS_TY = #{bbsTy} AND REGIST_NO = #{registNo} ) B
+					ON A.REGIST_NO = B.REGIST_NO
+				   AND A.BBSCTT_NO = B.BBSCTT_NO
+			 LEFT JOIN ( SELECT * FROM MBER_INFO WHERE SSBYP = '2' ) C
+					ON  A.MBER_CD = C.MBER_CD
+			ORDER BY A.INSERT_USER_DT ASC ) O
+            WHERE 1=1
+		<if test="cmpnyNm != null and cmpnyNm != ''">
+			AND O.CMPNY_NM LIKE '%${cmpnyNm}%'
+		</if>
+		ORDER BY INSERT_USER_DT DESC
+		LIMIT #{firstIndex}, #{recordCountPerPage}
+    </select>
+
+	<select id="SelectReqBestCompOthersListTotCnt" parameterType="showVO" resultType="int">
+		SELECT COUNT(*) cnt
+		FROM (
+				SELECT A.*, B.BBS_TY, B.SJ, B.CN, B.EVENT_GB, B.EVENT_CD, B.WRTER, B.WRITNG_DE, B.ATCH_FILE_NM, B.ATCH_FILE_COURS,
+						B.ATCH_FILE_NM2, B.ATCH_FILE_COURS2, B.ATCH_FILE_NM3, B.ATCH_FILE_COURS3, B.ETC1, B.ETC2, B.ETC3, B.ETC4, B.ETC5,
+						DATE_FORMAT(STR_TO_DATE(B.ETC4, '%Y%m%d') , '%Y-%m-%d') AS TO_DATE, 
+						CASE 
+							WHEN B.EVENT_GB = '0' THEN (SELECT CONCAT('[전시] ' , EXBI_NM) FROM EXBI_REGIST_INFO WHERE EXBI_CD = B.EVENT_CD)
+							WHEN B.EVENT_GB = '1' THEN (SELECT CONCAT('[상담] ' , EVENT_NM) FROM CNSLTEXHB_REGIST_INFO WHERE CNSLTEXHB_CD = B.EVENT_CD)
+							ELSE ''
+						END EVENT_NM,
+						DATE_FORMAT(B.INSERT_USER_DT, '%Y-%m-%d') FROM_DATE, C.SSBYP, C.ID, C.SSBYP_GB, C.TELNO
+			  FROM WINNER_REQST_INFO A 
+			  JOIN ( SELECT * FROM BBS_CM WHERE BBS_TY = #{bbsTy} AND REGIST_NO = #{registNo} ) B
+				ON A.REGIST_NO = B.REGIST_NO
+			   AND A.BBSCTT_NO = B.BBSCTT_NO
+		 LEFT JOIN ( SELECT * FROM MBER_INFO WHERE SSBYP = '2' ) C
+				ON  A.MBER_CD = C.MBER_CD
+		ORDER BY A.INSERT_USER_DT ASC ) O
+		WHERE 1=1
+		<if test="cmpnyNm != null and cmpnyNm != ''">
+			AND O.CMPNY_NM LIKE '%${cmpnyNm}%'
+		</if>
+    </select>
+    
+    <select id="SelectBestCompStatus" parameterType="showVO" resultType="showVO">
+        SELECT A.CD_ITEM, COALESCE(CNT, 0) CNT
+          FROM (
+                SELECT CD_ITEM
+                  FROM CODEBOOK
+                 WHERE CD_DEC = 'BESTCOMP_STATUS'
+                 ) A
+          LEFT JOIN (
+                    SELECT WINNER_STATUS, COUNT(*) CNT
+                      FROM WINNER_REQST_INFO A
+                     WHERE 1 = 1
+                       AND REGIST_NO = #{registNo}
+                     GROUP BY WINNER_STATUS   
+                 )  B
+            ON A.CD_ITEM = B.WINNER_STATUS
+       ORDER BY CD_ITEM 
+    </select>
+    
+	<!-- 전시상담포털 > MyDesk > 우수업체선정 : 선정업체 조회 -->
+	<select id="SelectBestCompStatusCompanyList" parameterType="showVO" resultType="showVO">
+			SELECT CMPNY_NM, MBER_CD, BBSCTT_NO, REGIST_NO
+			  FROM WINNER_REQST_INFO
+			  WHERE 1 = 1  
+			   AND REGIST_NO = #{registNo}
+			   AND WINNER_STATUS = '1'
+	</select>
+
+	<!-- 전시상담포털 > MyDesk > 우수업체선정 : 선정완료 -->
+	<update id="UpdateBestCompResultComplete" parameterType="showVO">
+		UPDATE BBS_CM
+		SET ETC2 = #{etc2}, ETC3 = #{etc3}, ETC1 = '완료'
+		WHERE BBS_TY = '6'
+		  AND REGIST_NO = #{registNo}
+	</update>
+
+	<!-- 전시상담포털 > MyDesk > 우수업체선정 : 신청데이터 입력
+	<insert id="InsertWinnerReqstInfo" parameterType="showVO">
+		INSERT INTO WINNER_REQST_INFO (REGIST_NO, BBSCTT_NO, MBER_CD, CMPNY_NM, CMPNY_NM_ENG,
+		  RPRSNTV, FOND_DE, BIZ_NUM, COR_NUM, LOCPLC, POST_CODE1, POST_CODE2, FA_LOCPLC, FA_POST_CODE1,
+		  FA_POST_CODE2, WORK_CNT, FA_WORK_CNT, HMPG, MAIN_PRDUCT, APPLY_FILE_NM, APPLY_FILE_PATH,
+		  MAIN_PRODUCT_FILE_NM, MAIN_PRODUCT_FILE_PATH, RSCTFT_FILE_NM, RSCTFT_FILE_PATH,
+		  CAREER_FILE_NM, CAREER_FILE_PATH, AGREE_FILE_NM, AGREE_FILE_PATH, WINNER_STATUS,
+		  INSERT_USER_ID, UPDATE_USER_DT, UPDATE_USER_ID, INSERT_USER_DT, SALAMT_STDYY1, SALAMT_STDYY2,
+		  SALAMT1, SALAMT2, CHARGER_NM, CHARGER_DEPT, CHARGER_OFCPS, CHARGER_TLPHON, CHARGER_EMAIL)
+		values (#{registNo}, #{bbscttNo:DECIMAL#{, #{mberCd}, #{cmpnyNm},
+		  #{cmpnyNmEng}, #{rprsntv}, #{fondDe}, #{bizNum}, #{corNum},
+		  #{locplc}, #{postCode1}, #{postCode2}, #{faLocplc},
+		  #{faPostCode1}, #{faPostCode2}, #{workCnt}, #{faWorkCnt},
+		  #{hmpg}, #{mainPrduct}, #{applyFileNm}, #{applyFilePath},
+		  #{mainProductFileNm}, #{mainProductFilePath}, #{rsctftFileNm},
+		  #{rsctftFilePath}, #{careerFileNm}, #{careerFilePath},
+		  #{agreeFileNm}, #{agreeFilePath}, #{winnerStatus},
+		  #{{insertUserId}, NOW(), #{{updateUserId}, NOW(), #{salamtStdyy1}, #{salamtStdyy2}, #{salamt1},
+		  #{salamt2}, #{chargerNm}, #{chargerDept}, #{chargerOfcps},
+		  #{chargerTlphon}, #{chargerEmail})
+	</insert>
+ -->
+	<!-- 전시상담포털 > MyDesk > 우수업체선정 : 신청데이터 업데이트 -->
+	<update id="UpdateWinnerReqstInfo" parameterType="showVO">
+		UPDATE WINNER_REQST_INFO
+	    <set>
+			<if test="cmpnyNm != null">CMPNY_NM = #{cmpnyNm},</if>
+			<if test="cmpnyNmEng != null">CMPNY_NM_ENG = #{cmpnyNmEng},</if>
+			<if test="rprsntv != null">RPRSNTV = #{rprsntv},</if>
+			<if test="fondDe != null">FOND_DE = #{fondDe},</if>
+			<if test="bizNum != null">BIZ_NUM = #{bizNum},</if>
+			<if test="corNum != null">COR_NUM = #{corNum},</if>
+			<if test="locplc != null">LOCPLC = #{locplc},</if>
+			<if test="postCode1 != null">POST_CODE1 = #{postCode1},</if>
+			<if test="postCode2 != null">POST_CODE2 = #{postCode2},</if>
+			<if test="faLocplc != null">FA_LOCPLC = #{faLocplc},</if>
+			<if test="faPostCode1 != null">FA_POST_CODE1 = #{faPostCode1},</if>
+			<if test="faPostCode2 != null">FA_POST_CODE2 = #{faPostCode2},</if>
+			<if test="workCnt != null">WORK_CNT = #{workCnt},</if>
+			<if test="faWorkCnt != null">FA_WORK_CNT = #{faWorkCnt},</if>
+			<if test="hmpg != null">HMPG = #{hmpg},</if>
+			<if test="mainPrduct != null">MAIN_PRDUCT = #{mainPrduct},</if>
+			<if test="applyFileNm != null">APPLY_FILE_NM = #{applyFileNm},</if>
+			<if test="applyFilePath != null">APPLY_FILE_PATH = #{applyFilePath},</if>
+			<if test="mainProductFileNm != null">MAIN_PRODUCT_FILE_NM = #{mainProductFileNm},</if>
+			<if test="mainProductFilePath != null">MAIN_PRODUCT_FILE_PATH = #{mainProductFilePath},</if>
+			<if test="rsctftFileNm != null">RSCTFT_FILE_NM = #{rsctftFileNm},</if>
+			<if test="rsctftFilePath != null">RSCTFT_FILE_PATH = #{rsctftFilePath},</if>
+			<if test="careerFileNm != null">CAREER_FILE_NM = #{careerFileNm},</if>
+			<if test="careerFilePath != null">CAREER_FILE_PATH = #{careerFilePath},</if>
+			<if test="agreeFileNm != null">AGREE_FILE_NM = #{agreeFileNm},</if>
+			<if test="agreeFilePath != null">AGREE_FILE_PATH = #{agreeFilePath},</if>
+			<if test="salamtStdyy1 != null">SALAMT_STDYY1 = #{salamtStdyy1},</if>
+			<if test="salamtStdyy2 != null">SALAMT_STDYY2 = #{salamtStdyy2},</if>
+			<if test="salamt1 != null">SALAMT1 = #{salamt1},</if>
+			<if test="salamt2 != null">SALAMT2 = #{salamt2},</if>
+			<if test="chargerNm != null">CHARGER_NM = #{chargerNm},</if>
+			<if test="chargerDept != null">CHARGER_DEPT = #{chargerDept},</if>
+			<if test="chargerOfcps != null">CHARGER_OFCPS = #{chargerOfcps},</if>
+			<if test="chargerTlphon != null">CHARGER_TLPHON = #{chargerTlphon},</if>
+			<if test="chargerEmail != null">CHARGER_EMAIL = #{chargerEmail},</if>
+		    <if test="updateUserId != null">UPDATE_USER_ID=#{updateUserId},</if>
+		    <if test="updateUserId != null">UPDATE_USER_DT=NOW()</if>
+	    </set>
+		WHERE REGIST_NO = #{registNo}
+		  AND BBSCTT_NO = #{bbscttNo}
+		  AND MBER_CD = #{mberCd}
+	</update> 
+	
+	<!-- 전시상담포털 > MyDesk > 우수업체선정 : 신청데이터삭제 -->
+	<delete id="DeleteBestCompanyRequest" parameterType="showVO">
+		DELETE FROM WINNER_REQST_INFO
+		WHERE REGIST_NO = #{registNo}
+		  AND BBSCTT_NO = #{bbscttNo}
+		  AND MBER_CD = #{mberCd}
+	</delete>
+    
+	<!-- 전시상담포털 > MyDesk > 우수업체선정 : 선정업데이트 -->
+	<update id="UpdateWinnerStatus" parameterType="showVO">
+		UPDATE WINNER_REQST_INFO
+		SET   WINNER_STATUS = #{winnerStatus}
+		WHERE REGIST_NO = #{registNo}
+		  AND BBSCTT_NO = #{bbscttNo}
+		  AND MBER_CD = #{mberCd}
+	</update> 
+
+	<!-- MyDesk > 지원사업관리 -->
+	<select id="SelectPreCombo0" parameterType="showVO" resultType="showVO">
+			SELECT EXBI_CD DATA, EXBI_NM LABEL
+			FROM EXBI_REGIST_INFO
+			WHERE INSTT_MBER_CD = #{insttMberCd}
+			ORDER BY EXBI_CD DESC
+	</select>
+	
+	<select id="SelectPreCombo1" parameterType="showVO" resultType="showVO">
+			SELECT CNSLTEXHB_CD DATA, EVENT_NM LABEL
+			FROM CNSLTEXHB_REGIST_INFO
+			WHERE INSTT_MBER_CD = #{insttMberCd}
+			ORDER BY CNSLTEXHB_CD DESC
+	</select>
+	
+	<!-- MyDesk > 참가신청업체 -->
+	<select id="SelectRedyExbiCombo" parameterType="showVO" resultType="showVO">
+		SELECT EXBI_CD DATA,  EXBI_NM LABEL, SELECT_CMPL CMPL
+		FROM EXBI_REGIST_INFO 
+		WHERE INSTT_MBER_CD = #{insttMberCd}
+		AND SLCTN_YN = 'Y'
+		ORDER BY OPMT_BEGIN_DE DESC
+	</select>
+
+	<select id="SelectRedyCnsltCombo" parameterType="showVO" resultType="showVO">
+		SELECT CNSLTEXHB_CD DATA, EVENT_NM LABEL, MATCHING_CMPL_YN CMPL
+		FROM CNSLTEXHB_REGIST_INFO
+		WHERE INSTT_MBER_CD = #{insttMberCd}
+		AND SLCTN_AT = 'Y'
+		ORDER BY EVENT_BEGIN_DE DESC
+	</select>
+	
+	<!-- MyDesk > 입찰신청관리 -->
+  	<select id="SelectBiddingCombo"  parameterType="showVO" resultType="showVO">
+		SELECT REGIST_NO DATA, CONCAT(CASE WHEN EVENT_GB = '0' THEN '[전시] ' WHEN EVENT_GB = '1' THEN '[상담] ' ELSE '' END , SJ) LABEL
+		FROM BBS_CM
+		WHERE BBS_TY = '2'
+			AND WRTER = #{wrter}
+		ORDER BY BBSCTT_NO DESC
+	</select>
+	
+	<!-- MyDesk > 우수기업선정 -->
+	<select id="SelectBestCompCombo" parameterType="showVO" resultType="showVO">
+        SELECT REGIST_NO DATA, SJ LABEL
+        FROM BBS_CM 
+        WHERE BBS_TY = '6'
+          AND WRTER = #{wrter}
+        ORDER BY REGIST_NO DESC
+    </select>
+    
+    <!-- MyDesk > 입찰공고 입력 -->
+	<select id="SelectRedyEventCombo" parameterType="showVO" resultType="showVO">
+		SELECT DATA, LABEL FROM (
+				SELECT EXBI_CD DATA, concat('[전시] ',EXBI_NM) LABEL
+				FROM EXBI_REGIST_INFO 
+				WHERE INSTT_MBER_CD = #{insttMberCd}
+				AND SLCTN_YN = 'Y'
+				AND PROGRS_STTUS IN ('0','1','2','3')				
+				UNION 				
+				SELECT CNSLTEXHB_CD DATA, concat('[상담] ', EVENT_NM) LABEL
+				FROM CNSLTEXHB_REGIST_INFO
+				WHERE INSTT_MBER_CD = #{insttMberCd}
+				AND SLCTN_AT = 'Y'
+				AND PROGRS_STTUS IN ('0','1','2','3')
+			) A
+		ORDER BY A.DATA ASC
+	</select>
+	
+	<!-- 정보센터 행사명 받아오기 -->
+	<select id="SelectEventNm" parameterType="showVO" resultType="showVO">
+		<if test="gubun == 0">
+			SELECT EXBI_NM as EVENT_NM FROM  EXBI_REGIST_INFO 
+		    WHERE  EXBI_CD = #{code}
+		</if>
+		<if test="gubun == 1">
+			SELECT EVENT_NM as EVENT_NM FROM CNSLTEXHB_REGIST_INFO 
+		    WHERE  CNSLTEXHB_CD = #{code}
+		</if>
+	</select>
+</mapper>

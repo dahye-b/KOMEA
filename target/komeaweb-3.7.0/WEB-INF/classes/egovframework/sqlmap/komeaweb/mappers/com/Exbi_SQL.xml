@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.komeaweb.com.service.impl.ExbiMapper">
+
+	<select id="SelectExbiList" parameterType="exbiVO" resultType="exbiVO">
+		SELECT * FROM (
+ 		SELECT CONCAT(INSTT_MBER_CD , EXBI_CD) AS GRID_ID
+               , '0' AS GUBUN
+               , INSTT_MBER_CD
+               , EXBI_CD
+               , EXBI_NM
+               , OPMT_BEGIN_DE
+               , OPMT_CLOS_DE
+               , OPMT_PLACE
+               , RCEPT_BEGIN_DE
+               , RCEPT_CLOS_DE
+               , CHARGER_NM
+               , CHARGER_TLPHON
+               , CHARGER_FAX
+               , CHARGER_EMAIL
+               , SLCTN_YN
+               , (SELECT CD_KOR FROM CODEBOOK WHERE CD_DEC = 'PROGRS_STTUS' AND CD_ITEM = concat(TBL1.PROGRS_STTUS , IFNULL(TBL1.SLCTN_YN, ''))) AS progrsSttus
+            FROM EXBI_REGIST_INFO TBL1
+           UNION ALL
+          SELECT CONCAT(INSTT_MBER_CD , CNSLTEXHB_CD) AS GRID_ID
+               , '1' AS GUBUN
+               , INSTT_MBER_CD
+               , CNSLTEXHB_CD
+               , EVENT_NM
+               , EVENT_BEGIN_DE
+               , EVENT_CLOS_DE
+               , PLACE
+               , RCEPT_BEGIN_DE
+               , RCEPT_CLOS_DE
+               , CHARGER_NM
+               , CHARGER_TLPHON
+               , CHARGER_FAX
+               , CHARGER_EMAIL
+               , SLCTN_AT
+               , (SELECT CD_KOR FROM CODEBOOK WHERE CD_DEC = 'PROGRS_STTUS' AND CD_ITEM = concat(TBL2.PROGRS_STTUS , IFNULL(TBL2.SLCTN_AT, ''))) AS progrsSttus
+            FROM CNSLTEXHB_REGIST_INFO TBL2) TAB
+			WHERE 1=1
+			<if test="searchKeyword != null">
+				AND EXBI_NM like '%${searchKeyword}%'
+			</if>
+            ORDER BY SLCTN_YN IS NULL DESC, OPMT_BEGIN_DE DESC
+			LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+
+	<select id="SelectExbiListTotCnt" parameterType="exbiVO" resultType="int">
+			SELECT COUNT(*) cnt
+			FROM(
+ 		SELECT CONCAT(INSTT_MBER_CD , EXBI_CD) AS GRID_ID
+               , 'EXBI_REGIST_INFO' AS TYPE
+               , INSTT_MBER_CD
+               , EXBI_CD
+               , EXBI_NM
+               , OPMT_BEGIN_DE
+               , OPMT_CLOS_DE
+               , OPMT_PLACE
+               , RCEPT_BEGIN_DE
+               , RCEPT_CLOS_DE
+               , CHARGER_NM
+               , CHARGER_TLPHON
+               , CHARGER_FAX
+               , CHARGER_EMAIL
+               , SLCTN_YN
+               , (SELECT CD_KOR FROM CODEBOOK WHERE CD_DEC = 'PROGRS_STTUS' AND CD_ITEM = concat(TBL1.PROGRS_STTUS , IFNULL(TBL1.SLCTN_YN, ''))) AS STATUS
+            FROM EXBI_REGIST_INFO TBL1
+           UNION ALL
+          SELECT CONCAT(INSTT_MBER_CD , CNSLTEXHB_CD) AS GRID_ID
+               , 'CNSLTEXHB_REGIST_INFO' AS TYPE
+               , INSTT_MBER_CD
+               , CNSLTEXHB_CD
+               , EVENT_NM
+               , EVENT_BEGIN_DE
+               , EVENT_CLOS_DE
+               , PLACE
+               , RCEPT_BEGIN_DE
+               , RCEPT_CLOS_DE
+               , CHARGER_NM
+               , CHARGER_TLPHON
+               , CHARGER_FAX
+               , CHARGER_EMAIL
+               , SLCTN_AT
+               , (SELECT CD_KOR FROM CODEBOOK WHERE CD_DEC = 'PROGRS_STTUS' AND CD_ITEM = concat(TBL2.PROGRS_STTUS , IFNULL(TBL2.SLCTN_AT, ''))) AS STATUS
+            FROM CNSLTEXHB_REGIST_INFO TBL2) TAB
+			WHERE 1=1
+			<if test="searchKeyword != null">
+				AND EXBI_NM like '%${searchKeyword}%'
+			</if>
+	</select>
+	
+	<select id="SelectExbiView" parameterType="exbiVO" resultType="buyerVO">
+		SELECT BANNER_NO, BANNER_DESC, BANNER_SORT, BANNER_FILE, BANNER_USE_YN, BANNER_LINK, BANNER_GB
+		  FROM BANNER_INFO
+		 WHERE BANNER_NO = #{bannerNo}
+	</select>
+
+	<insert id="InsertExbi" parameterType="exbiVO">
+			<selectKey resultType="int" keyProperty="buyerCd" order="BEFORE">
+				SELECT MAX(BANNER_NO)+1 FROM BANNER_INFO
+			</selectKey>
+			INSERT INTO BANNER_INFO (BANNER_NO, BANNER_DESC, BANNER_SORT, BANNER_USE_YN, BANNER_LINK, BANNER_GB)
+			VALUES (
+			  #{bannerNo}, #{bannerDesc}, #{bannerSort}, #{bannerUseYn}, #{bannerLink}, #{bannerGb}
+			  )
+	</insert>
+	
+	<update id="UpdateExbiFile" parameterType="hashMap">
+			UPDATE BANNER_INFO 
+			SET BANNER_FILE = #{bannerFile}
+			WHERE BANNER_NO = #{bannerNo}
+	</update>
+	
+	<update id="UpdateExbislctnYn" parameterType="exbiVO">
+			UPDATE EXBI_REGIST_INFO 
+			SET SLCTN_YN = #{slctnYn}
+            WHERE INSTT_MBER_CD = #{insttMberCd}
+              AND EXBI_CD = #{code}
+	</update>
+	
+	<update id="UpdateCnsltexhbslctnYn" parameterType="exbiVO">
+			UPDATE CNSLTEXHB_REGIST_INFO 
+		    SET SLCTN_AT = #{slctnYn}
+		    WHERE CNSLTEXHB_CD = #{code}
+		      AND INSTT_MBER_CD = #{insttMberCd}
+	</update>
+	
+	<update id="DeleteExbi" parameterType="exbiVO">
+			UPDATE BANNER_INFO 
+			SET BANNER_USE_YN = 'N'
+			WHERE BANNER_NO = #{bannerNo}
+	</update>
+
+</mapper>

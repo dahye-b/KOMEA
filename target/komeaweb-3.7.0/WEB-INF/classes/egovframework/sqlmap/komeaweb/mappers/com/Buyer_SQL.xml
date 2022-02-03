@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.komeaweb.com.service.impl.BuyerMapper">
+
+	<select id="SelectBuyerList" parameterType="buyerVO" resultType="buyerVO">
+			SELECT BUYER_CD, ENTRPS_NM, NATION_NM, GB, ADRES, CTTPC, FAX, EMAIL, IFNULL(HMPG,'-') HMPG,
+		           'http://' + REPLACE(HMPG, 'http://', '') AS HMPG_URL, 
+		            MAIN_SRVC, EMPLY_CO, CHARGER_NM, CHARGER_CTTPC, CHARGER_EMAIL, PARTCPTN_EVENT, 
+		            HOPE_GOODS, YEAR_SALES, BUYER_INTRO, EMPLOYEE_CN, RPRSNTV, GB_ETC_DESC, INTEREST_ITEM,
+		            CHARGER_DEPT,CHARGER_OFCPS, CATAL_FILE_NM1, CATAL_FILE_PATH1
+		        FROM
+		            BUYER_DB_INFO
+		        WHERE DELETE_YN = 'N'
+			<if test="gb != null and gb != ''">
+				AND GB like '%${gb}%'
+			</if>
+			<if test="entrpsNm != null and entrpsNm != ''">
+				AND ENTRPS_NM LIKE '%${entrpsNm}%'
+			</if>
+		    ORDER BY ENTRPS_NM
+			LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+
+	<select id="SelectBuyerListTotCnt" parameterType="buyerVO" resultType="int">
+			SELECT COUNT(*) cnt
+			FROM BUYER_DB_INFO
+	        WHERE DELETE_YN = 'N'
+		<if test="gb != null and gb != ''">
+			AND GB like '%${gb}%'
+		</if>
+		<if test="entrpsNm != null and entrpsNm != ''">
+			AND ENTRPS_NM LIKE '%${entrpsNm}%'
+		</if>
+	</select>
+	
+	<select id="SelectBuyerView" parameterType="buyerVO" resultType="buyerVO">
+		SELECT BUYER_CD, ENTRPS_NM, NATION_NM, GB, ADRES, CTTPC, FAX, EMAIL, HMPG,
+		            MAIN_SRVC, EMPLY_CO, CHARGER_NM, CHARGER_CTTPC, CHARGER_EMAIL, PARTCPTN_EVENT, 
+		            INSERT_USER_ID, UPDATE_USER_DT, UPDATE_USER_ID, INSERT_USER_DT, 
+		            HOPE_GOODS, YEAR_SALES, BUYER_INTRO, EMPLOYEE_CN, RPRSNTV,
+		            GB_ETC_DESC, INTEREST_ITEM, CHARGER_DEPT, CHARGER_OFCPS, CATAL_FILE_NM1, CATAL_FILE_PATH1
+		  FROM BUYER_DB_INFO
+		 WHERE BUYER_CD = #{buyerCd}
+	</select>
+	
+	<select id="SelectBuyerView1" parameterType="buyerVO" resultType="buyerVO">
+		SELECT *
+		  FROM BUYER_DB_INFO
+		 WHERE BUYER_CD = #{buyerCd}
+	</select>
+
+	<insert id="InsertBuyer" parameterType="buyerVO">
+			<selectKey resultType="int" keyProperty="buyerCd" order="BEFORE">
+				SELECT MAX(BANNER_NO)+1 FROM BUYER_DB_INFO
+			</selectKey>
+			INSERT INTO BUYER_DB_INFO (BANNER_NO, BANNER_DESC, BANNER_SORT, BANNER_USE_YN, BANNER_LINK, BANNER_GB)
+			VALUES (
+			  #{bannerNo}, #{bannerDesc}, #{bannerSort}, #{bannerUseYn}, #{bannerLink}, #{bannerGb}
+			  )
+	</insert>
+	
+	<update id="UpdateBuyerFile" parameterType="hashMap">
+			UPDATE BUYER_DB_INFO 
+			SET CATAL_FILE_NM1 = #{buyerFile}
+				CATAL_FILE_PATH1 = #{catalFilePath1}
+			WHERE BUYER_CD = #{buyerCd}
+	</update>
+	
+	<update id="DeleteBuyer" parameterType="buyerVO">
+			UPDATE BUYER_DB_INFO 
+			SET DELETE_YN = 'Y'
+			WHERE BUYER_CD = #{buyerCd}
+	</update>
+
+	<select id="SelectBuyerLsnInfo" parameterType="showVO" resultType="buyerVO">
+	SELECT INSTT_MBER_CD, CNSLTEXHB_CD, BUYER_CD, INSERT_USER_ID, UPDATE_USER_DT, UPDATE_USER_ID,
+	  INSERT_USER_DT, ATTENDEE_NM1, ATTENDEE_TLPHON1, ATTENDEE_FAX1, ATTENDEE_EMAIL1, ATTENDEE_NM2,
+	  ATTENDEE_TLPHON2, ATTENDEE_FAX2, ATTENDEE_EMAIL2, BUYER_ATTCH_FILE_NM1,
+	  BUYER_ATTCH_FILE_COURS1, BUYER_ATTCH_FILE_NM2, BUYER_ATTCH_FILE_COURS2
+	FROM BUYER_LSN_INFO
+	WHERE INSTT_MBER_CD = #{insttMberCd}
+	  AND CNSLTEXHB_CD = #{cnsltexhbCd}
+	  AND BUYER_CD = #{buyerCd}
+	</select>
+
+	<insert id="InsertBuyerDbInfo" parameterType="buyerVO">
+		<selectKey resultType="String" keyProperty="buyerCd" order="BEFORE">
+         select cast(IFNULL(MAX(BUYER_CD),cast(concat(DATE_FORMAT(NOW(), "%Y%c"),'000') as unsigned ))+1 as char)  BUYER_CD
+            FROM BUYER_DB_INFO
+          WHERE BUYER_CD LIKE  concat(cast(DATE_FORMAT(NOW(), "%Y%c") as char),'%')
+		</selectKey>
+		INSERT INTO BUYER_DB_INFO (BUYER_CD, ENTRPS_NM, NATION_NM, GB, ADRES, CTTPC, FAX, EMAIL,
+		  HMPG, MAIN_SRVC, EMPLY_CO, CHARGER_NM, CHARGER_CTTPC, CHARGER_EMAIL, PARTCPTN_EVENT,
+		  INSERT_USER_ID, UPDATE_USER_DT, UPDATE_USER_ID, INSERT_USER_DT, HOPE_GOODS, YEAR_SALES,
+		  BUYER_INTRO, EMPLOYEE_CN, RPRSNTV, GB_ETC_DESC, INTEREST_ITEM, DELETE_YN, CHARGER_DEPT,
+		  CHARGER_OFCPS, CATAL_FILE_NM1, CATAL_FILE_PATH1)
+		VALUES (#{buyerCd}, #{entrpsNm}, #{nationNm}, #{gb},
+		  #{adres}, #{cttpc}, #{fax}, #{email}, #{hmpg},
+		  #{mainSrvc}, #{emplyCo}, #{chargerNm}, #{chargerCttpc},
+		  #{chargerEmail}, #{partcptnEvent}, #{insertUserId},
+		  NOW(), #{updateUserId}, NOW(),
+		  #{hopeGoods}, #{yearSales}, #{buyerIntro}, #{employeeCn},
+		  #{rprsntv}, #{gbEtcDesc}, #{interestItem}, 'N',
+		  #{chargerDept}, #{chargerOfcps}, #{catalFileNm1},
+		  #{catalFilePath1})
+	</insert>
+
+	<insert id="insertBuyerLsnInfo" parameterType="buyerVO">
+	INSERT INTO BUYER_LSN_INFO (INSTT_MBER_CD, CNSLTEXHB_CD, BUYER_CD, INSERT_USER_ID,
+	  UPDATE_USER_DT, UPDATE_USER_ID, INSERT_USER_DT, ATTENDEE_NM1, ATTENDEE_TLPHON1, ATTENDEE_FAX1,
+	  ATTENDEE_EMAIL1, ATTENDEE_NM2, ATTENDEE_TLPHON2, ATTENDEE_FAX2, ATTENDEE_EMAIL2,
+	  BUYER_ATTCH_FILE_NM1, BUYER_ATTCH_FILE_COURS1, BUYER_ATTCH_FILE_NM2, BUYER_ATTCH_FILE_COURS2)
+	VALUES (#{insttMberCd}, #{cnsltexhbCd}, #{buyerCd}, #{insertUserId},
+	  NOW(), #{updateUserId}, NOW(),
+	  #{attendeeNm1}, #{attendeeTlphon1}, #{attendeeFax1},
+	  #{attendeeEmail1}, #{attendeeNm2}, #{attendeeTlphon2},
+	  #{attendeeFax2}, #{attendeeEmail2}, #{buyerAttchFileNm1},
+	  #{buyerAttchFileCours1}, #{buyerAttchFileNm2}, #{buyerAttchFileCours2})
+	</insert>
+
+    <update id="UpdateBuyerDbInfo" parameterType="buyerVO">
+    UPDATE BUYER_DB_INFO
+	    <set>
+			<if test="entrpsNm != null">ENTRPS_NM = #{entrpsNm},</if>
+			<if test="nationNm != null">NATION_NM = #{nationNm},</if>
+			<if test="gb != null">GB = #{gb},</if>
+			<if test="adres != null">ADRES = #{adres},</if>
+			<if test="cttpc != null">CTTPC = #{cttpc},</if>
+			<if test="fax != null">FAX = #{fax},</if>
+			<if test="email != null">EMAIL = #{email},</if>
+			<if test="hmpg != null">HMPG = #{hmpg},</if>
+			<if test="mainSrvc != null">MAIN_SRVC = #{mainSrvc},</if>
+			<if test="emplyCo != null">EMPLY_CO = #{emplyCo},</if>
+			<if test="chargerNm != null">CHARGER_NM = #{chargerNm},</if>
+			<if test="chargerCttpc != null">CHARGER_CTTPC = #{chargerCttpc},</if>
+			<if test="chargerEmail != null">CHARGER_EMAIL = #{chargerEmail},</if>
+			<if test="partcptnEvent != null">PARTCPTN_EVENT = #{partcptnEvent},</if>
+			<if test="hopeGoods != null">HOPE_GOODS = #{hopeGoods},</if>
+			<if test="yearSales != null">YEAR_SALES = #{yearSales},</if>
+			<if test="buyerIntro != null">BUYER_INTRO = #{buyerIntro},</if>
+			<if test="employeeCn != null">EMPLOYEE_CN = #{employeeCn},</if>
+			<if test="rprsntv != null">RPRSNTV = #{rprsntv},</if>
+			<if test="gbEtcDesc != null">GB_ETC_DESC = #{gbEtcDesc},</if>
+			<if test="interestItem != null">INTEREST_ITEM = #{interestItem},</if>
+			<if test="deleteYn != null">DELETE_YN = #{deleteYn},</if>
+			<if test="chargerDept != null">CHARGER_DEPT = #{chargerDept},</if>
+			<if test="chargerOfcps != null">CHARGER_OFCPS = #{chargerOfcps},</if>
+			<if test="catalFileNm1 != null">CATAL_FILE_NM1 = #{catalFileNm1},</if>
+			<if test="catalFilePath1 != null">CATAL_FILE_PATH1 = #{catalFilePath1},</if>
+			<if test="updateUserId != null">UPDATE_USER_DT = NOW()</if>
+			<if test="updateUserId != null">UPDATE_USER_ID = #{updateUserId}</if>
+	    </set>
+    where BUYER_CD = #{buyerCd}
+  </update>
+  
+  	<delete id="DeleteBuyerLsnInfo" parameterType="buyerVO">
+		DELETE FROM  BUYER_LSN_INFO 
+		WHERE CNSLTEXHB_CD = #{cnsltexhbCd}
+		  AND BUYER_CD = #{buyerCd}
+	</delete>
+
+  <update id="UpdateBuyerLsnInfo" parameterType="buyerVO">
+    UPDATE BUYER_LSN_INFO
+	    <set>
+			<if test="attendeeNm1 != null">ATTENDEE_NM1 = #{attendeeNm1},</if>
+			<if test="attendeeTlphon1 != null">ATTENDEE_TLPHON1 = #{attendeeTlphon1},</if>
+			<if test="attendeeFax1 != null">ATTENDEE_FAX1 = #{attendeeFax1},</if>
+			<if test="attendeeEmail1 != null">ATTENDEE_EMAIL1 = #{attendeeEmail1},</if>
+			<if test="attendeeNm2 != null">ATTENDEE_NM2 = #{attendeeNm2},</if>
+			<if test="attendeeTlphon2 != null">ATTENDEE_TLPHON2 = #{attendeeTlphon2},</if>
+			<if test="attendeeFax2 != null">ATTENDEE_FAX2 = #{attendeeFax2},</if>
+			<if test="attendeeEmail2 != null">ATTENDEE_EMAIL2 = #{attendeeEmail2},</if>
+			<if test="buyerAttchFileNm1 != null">BUYER_ATTCH_FILE_NM1 = #{buyerAttchFileNm1},</if>
+			<if test="buyerAttchFileCours1 != null">BUYER_ATTCH_FILE_COURS1 = #{buyerAttchFileCours1},</if>
+			<if test="buyerAttchFileNm2 != null">BUYER_ATTCH_FILE_NM2 = #{buyerAttchFileNm2},</if>
+			<if test="buyerAttchFileCours2 != null">BUYER_ATTCH_FILE_COURS2 = #{buyerAttchFileCours2},</if>
+			<if test="updateUserId != null">UPDATE_USER_DT = NOW(),</if>
+			<if test="updateUserId != null">UPDATE_USER_ID = #{updateUserId}</if>
+	    </set>
+    where INSTT_MBER_CD = #{insttMberCd}
+      and CNSLTEXHB_CD = #{cnsltexhbCd}
+      and BUYER_CD = #{buyerCd}
+  </update>
+
+</mapper>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.komeaweb.com.service.impl.CodeMapper">
+
+	<select id="SelectCodeList" parameterType="codeVO" resultType="codeVO">
+			SELECT CD_DEC, CD_ITEM, CD_KOR, CD_REF1, CD_REF2, CD_REF3, NUM_REF1, NUM_REF2, NUM_REF3, SORT_ORDER, USE_YN, REMARKS 
+			FROM CODEBOOK
+			WHERE 1=1
+			<if test="searchKeyword != null">
+				<choose>
+					<when test="searchCondition == 0">
+						AND CD_DEC like '%${searchKeyword}%'
+					</when>
+					<when test="searchCondition == 1">
+						AND CD_KOR LIKE '%${searchKeyword}%'
+					</when>					
+					<otherwise>
+					</otherwise>
+				</choose>
+			</if>
+			LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+
+	<select id="SelectCodeListTotCnt" parameterType="codeVO" resultType="int">
+			SELECT COUNT(*) cnt
+			FROM CODEBOOK
+			WHERE 1=1
+			<if test="searchKeyword != null">
+				<choose>
+					<when test="searchCondition == 0">
+						AND CD_DEC like '%${searchKeyword}%'
+					</when>
+					<when test="searchCondition == 1">
+						AND CD_KOR LIKE '%${searchKeyword}%'
+					</when>					
+					<otherwise>
+					</otherwise>
+				</choose>
+			</if>
+	</select>
+	
+	<select id="SelectCodeView" parameterType="codeVO" resultType="codeVO">
+		SELECT CD_DEC, CD_ITEM, CD_KOR, CD_REF1, CD_REF2, CD_REF3, NUM_REF1, NUM_REF2, NUM_REF3, SORT_ORDER, USE_YN, REMARKS
+		  FROM CODEBOOK
+		 WHERE CD_DEC = #{cdDec}
+	</select>
+
+	<insert id="InsertCode" parameterType="codeVO">
+			INSERT INTO CODEBOOK (CD_DEC, CD_ITEM, CD_KOR, CD_REF1, CD_REF2, CD_REF3, NUM_REF1, NUM_REF2, NUM_REF3, SORT_ORDER, USE_YN, REMARKS)
+			VALUES (
+			  #{cdDec}, #{cdItem}, #{cdKor}, #{cdRef1}, #{cdRef2}, #{cdRef3},
+			  #{numRef1}, #{numRef2}, #{numRef3}, #{sortOrder}, #{useYn}, #{remarks}
+			  )
+	</insert>
+	
+	<update id="UpdateCode" parameterType="codeVO">
+			UPDATE CODEBOOK 
+			SET CD_ITEM = #{cdItem},
+				CD_KOR = #{cdKor}, 
+				CD_REF1 = #{cdRef1}, 
+				CD_REF2 = #{cdRef2}, 
+				CD_REF3 = #{cdRef3}, 
+				NUM_REF1 = #{numRef1}, 
+				NUM_REF2 = #{numRef2}, 
+				NUM_REF3 = #{numRef3}, 
+				SORT_ORDER = #{sortOrder}, 
+				USE_YN = #{useYn}, 
+				REMARKS = #{remarks}
+			WHERE CD_DEC = #{cdDec}
+	</update>
+	
+	<update id="DeleteCode" parameterType="codeVO">
+			UPDATE CODEBOOK 
+			SET USE_YN = #{useYn}
+			WHERE CD_DEC = #{cdDec}
+	</update>
+
+</mapper>

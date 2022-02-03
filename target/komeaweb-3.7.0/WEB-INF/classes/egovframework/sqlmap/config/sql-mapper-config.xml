@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+	<settings>
+		<setting name="cacheEnabled" value="true"/>
+		<setting name="mapUnderscoreToCamelCase" value="true"/>
+		<setting name="jdbcTypeForNull" value="NULL"/>
+		<setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString"/>
+	</settings>
+    <typeAliases>
+    <!-- 공통 -->
+    	<typeAlias alias="komeaUser" type="egovframework.komeaweb.springsecurity.service.KomeaUser"/>
+    
+		<typeAlias alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+		<typeAlias alias="sampleVO" type="egovframework.example.cmmn.SampleVO"/>
+		
+	<!-- Admin -->
+		<typeAlias alias="mberVO" type="egovframework.komeaweb.com.service.MberVO"/>
+		<typeAlias alias="codeVO" type="egovframework.komeaweb.com.service.CodeVO"/>
+		<typeAlias alias="bannerVO" type="egovframework.komeaweb.com.service.BannerVO"/>
+		<typeAlias alias="popupVO" type="egovframework.komeaweb.com.service.PopupVO"/>
+		<typeAlias alias="buyerVO" type="egovframework.komeaweb.com.service.BuyerVO"/>
+		<typeAlias alias="exbiVO" type="egovframework.komeaweb.com.service.ExbiVO"/>
+	<!--komea -->
+		<typeAlias alias="showVO" type="egovframework.komeaweb.com.service.ShowVO"/>
+		
+		<typeAlias alias="KomeabbsVO" type="egovframework.komea.bbs.service.KomeabbsVO"/>
+		<typeAlias alias="KomeaCompVO" type="egovframework.komea.comp.service.KomeaCompVO"/>
+		
+    </typeAliases>
+</configuration>

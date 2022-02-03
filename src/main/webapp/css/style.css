@@ -1,0 +1,623 @@
+@charset "utf-8";
+
+/********************************************************
+1. Common CSS Definition
+2. Common Layout CSS Definition
+********************************************************/
+
+
+/* [Master Stylesheet - v1.0] */
+/* =========== Index of CSS ===========
+:: 1.0 Import Fonts
+:: 2.0 Import All CSS
+:: 3.1.0 Spacing
+:: 3.2.0 Height, Width
+:: 3.3.0 Section Padding
+:: 3.4.0 Section CSS
+:: 3.4.1 Card Section CSS
+:: 3.5.0 Content Area CSS
+:: 3.6.0 Preloader CSS
+:: 3.7.0 ScrollUp
+:: 3.8.0 Button & Button group
+
+:: 5.0 Main > Slide CSS
+
+:: 15.0 Popup Area CSS
+:: 16.0 Search Area CSS
+
+-- :: 18.1.0 Single Cool Facts CSS : 삭제예정
+-- :: 18.2.0 Accordians Area CSS : 삭제예정
+
+:: 19.0 Body Layout Area CSS
+:: 20.0 Table Area CSS
+
+:: 30.0 Bootstrap CSS Redifinition
+:: 40.0 Added CSS
+:: 41.0 for Test, for Debug
+*/
+
+
+/********************************************************
+:: 1.0 Import Fonts
+********************************************************/
+/* Noto Sans KR (korean) http://www.google.com/fonts/earlyaccess */
+/* @import url(http://fonts.googleapis.com/earlyaccess/notosanskr.css); IE9 이하 에서 적용불가 */
+/* @import url(/css/notosanskr.css);	크롬에서 적용불가 */
+@import url(/css/notosans.css);
+
+
+/********************************************************
+:: 2.0 Import All CSS
+********************************************************/
+/* @import url(css/bootstrap.min.css);		이미 소스에서 포함됨 */
+@import url(classy-nav.css);
+@import url(owl.carousel.min.css);
+@import url(animate.css);
+@import url(magnific-popup.css);
+/* @import url(css/font-awesome.min.css);		이미 소스에서 포함됨 */
+/* @import url(css/nice-select.css); */
+/* @import url(css/travel-icon.css); */
+/* @import url(css/nice-select.css); */
+@import url(layout.css);		/* 공동, Layout, index */
+@import url(sub.css);		/* Sub  */
+
+/********************************************************
+:: 3.1.0 Spacing
+********************************************************/
+.mt-5 {margin-top: 5px !important;}.mt-10 {margin-top: 10px !important;}.mt-15 {margin-top: 15px !important;}.mt-20 {margin-top: 20px !important;}
+.mt-30 {margin-top: 30px !important;}.mt-50 {margin-top: 50px !important;}.mt-70 {margin-top: 70px !important;}.mt-100 {margin-top: 100px !important;}
+.mb-5 {margin-bottom: 5px !important;}.mb-10 {margin-bottom: 10px !important;}.mb-15 {margin-bottom: 15px !important;}.mb-20 {margin-bottom:20px !important;}
+.mb-30 {margin-bottom: 30px !important;}.mb-50 {margin-bottom: 50px !important;}.mb-70 {margin-bottom: 70px !important;}.mb-80 {margin-bottom: 80px !important;}.mb-100 {margin-bottom: 100px !important;}
+
+.ml-5 {margin-left:5px !important;}.ml-10 {margin-left:10px !important;}.ml-15 {margin-left:15px !important;}.ml-20 {margin-left:20px !important;}
+.ml-30 {margin-left:30px !important;}.ml-40 {margin-left:40px !important;}.ml-50 {margin-left:50px !important;}
+.mr-5 {margin-right:5px !important;}.mr-10 {margin-right:10px !important;}.mr-15 {margin-right:15px !important;}.mr-20 {margin-right:20px !important;}
+.mr-30 {margin-right:30px !important;}.mr-40 {margin-right:40px !important;}.mr-50 {margin-right:50px !important;}
+.mx-5 {margin-left:5px !important;margin-right:5px !important;}.mx-10 {margin-left:10px !important;margin-right:10px !important;}
+.mx-15 {margin-left:15px !important;margin-right:15px !important;}.mx-20 {margin-left:20px !important;margin-right:20px !important;}
+.mx-30 {margin-left:30px !important;margin-right:30px !important;}.mx-40 {margin-left:40px !important;margin-right:40px !important;}.mx-50 {margin-left:50px !important;margin-right:50px !important;}
+.my-5 {margin-top:5px !important;margin-bottom:5px !important;}.my-10 {margin-top:10px !important;margin-bottom:10px !important;}
+.my-15 {margin-top:15px !important;margin-bottom:15px !important;}.my-20 {margin-top:20px !important;margin-bottom:20px !important;}
+.my-30 {margin-top:30px !important;margin-bottom:30px !important;}.my-40 {margin-top:40px !important;margin-bottom:40px !important;}.my-50 {margin-top:50px !important;margin-bottom:50px !important;}
+
+.pl-5 {padding-left:5px !important;}.pl-10 {padding-left:10px !important;}.pl-15 {padding-left:15px !important;}.pl-20 {padding-left:20px !important;}
+.pl-30 {padding-left:30px !important;}.pl-40 {padding-left:40px !important;}.pl-50 {padding-left:50px !important;}
+.pr-5 {padding-right:5px !important;}.pr-10 {padding-right:10px !important;}.pr-15 {padding-right:15px !important;}.pr-20 {padding-right:20px !important;}
+.pr-30 {padding-right:30px !important;}.pr-40 {padding-right:40px !important;}.pr-50 {padding-right:50px !important;}
+.pt-5 {padding-top:5px !important;}.pt-10 {padding-top:10px !important;}.pt-15 {padding-top:15px !important;}.pt-20 {padding-top:20px !important;}
+.pt-30 {padding-top:30px !important;}.pt-40 {padding-top:40px !important;}.pt-50 {padding-top:50px !important;}
+.pb-5 {padding-bottom:5px !important;}.pb-10 {padding-bottom:10px !important;}.pb-15 {padding-bottom:15px !important;}.pb-20 {padding-bottom:20px !important;}
+.pb-30 {padding-bottom:30px !important;}.pb-40 {padding-bottom:40px !important;}.pb-50 {padding-bottom:50px !important;}
+.px-5 {padding-left:5px !important;padding-right:5px !important;}.px-10 {padding-left:10px !important;padding-right:10px !important;}
+.px-15 {padding-left:15px !important;padding-right:15px !important;}.px-20 {padding-left:20px !important;padding-right:20px !important;}.px-30 {padding-left:30px !important;padding-right:30px !important;}
+.px-40 {padding-left:40px !important;padding-right:40px !important;}.px-50 {padding-left:50px !important;padding-right:50px !important;}.px-60 {padding-left:60px !important;padding-right:60px !important;}
+.px-70 {padding-left:70px !important;padding-right:70px !important;}.px-80 {padding-left:80px !important;padding-right:80px !important;}
+.py-5 {padding-top:5px !important;padding-bottom:5px !important;}.py-10 {padding-top:10px !important;padding-bottom:10px !important;}
+.py-15 {padding-top:15px !important;padding-bottom:15px !important;}.py-20 {padding-top:20px !important;padding-bottom:20px !important;}.py-30 {padding-top:30px !important;padding-bottom:30px !important;}
+.py-40 {padding-top:40px !important;padding-bottom:40px !important;}.py-60 {padding-top:60px !important;padding-bottom:60px !important;}
+
+.mb-100 {margin-bottom:100px !important;}
+@media only screen and (max-width:767px) {
+	.mb-50 {margin-bottom: 30px !important;}
+	.mb-100 {margin-bottom: 50px !important;}
+}
+
+/********************************************************
+:: 3.2.0 Height, Width
+********************************************************/
+.height-400 {height: 400px !important;}
+.height-500 {height: 500px !important;}
+.height-600 {height: 600px !important;}
+.height-700 {height: 700px !important;}
+.height-800 {height: 800px !important;}
+
+
+/********************************************************
+:: 3.2.0 Height, Width
+********************************************************/
+.wd-66 {width:66px !important;}
+.wd-10 {width:10px !important;}.wd-20 {width:20px !important;}.wd-30 {width:30px !important;}
+.wd-40 {width:40px !important;}.wd-50 {width:50px !important;}.wd-60 {width:60px !important;}
+.wd-70 {width:70px !important;}.wd-80 {width:80px !important;}.wd-90 {width:90px !important;}.wd-100 {width:100px !important;}
+.wd-110 {width:110px !important;}.wd-120 {width:120px !important;}.wd-130 {width:130px !important;}
+.wd-140 {width:140px !important;}.wd-150 {width:150px !important;}.wd-160 {width:160px !important;}
+.wd-170 {width:170px !important;}.wd-180 {width:180px !important;}.wd-190 {width:190px !important;}
+.wd-200 {width:200px !important;}
+.wd-250 {width:250px !important;}.wd-300 {width:300px !important;}.wd-350 {width:350px !important;}.wd-400 {width:400px !important;}
+.wd-450 {width:450px !important;}.wd-500 {width:500px !important;}
+/* @for $i from 1 through 20 {
+    $widthpx: 10px * $i;
+    $widthsize: 10 * $i;
+    .wd-#{$widthsize} {width:$widthpx !important;}
+}
+@for $i from 5 through 10 {
+    $widthpx: 50px * $i;
+    $widthsize: 50 * $i;
+    .wd-#{$widthsize} {width:$widthpx !important;}
+}
+*/
+
+/********************************************************
+:: 3.3.0 Section Padding
+********************************************************/
+.section-padding-50 {padding-top: 50px;padding-bottom: 50px;}
+.section-padding-100 {padding-top: 100px;padding-bottom: 100px;}
+.section-padding-100-0 {padding-top: 100px;padding-bottom: 0;}
+.section-padding-0-100 {padding-top: 0;padding-bottom: 100px;}
+.section-padding-100-70 {padding-top: 100px;padding-bottom: 70px;}
+
+
+
+/********************************************************
+:: 3.4.0 Section CSS
+********************************************************/
+.section-nav {position: relative;z-index:100;margin-bottom:15px;border-bottom:1px solid #ccc;background-color: #f7f7f7;}
+.section-area {padding:30px 0 0;}
+@media only screen and (max-width: 575px) {
+	.section-area {padding:10px 0 0;}
+	.dropdown-line-subtitle {padding-bottom: 0px;}
+}
+
+.section-heading {position: relative;z-index: 1;margin-bottom:30px;}
+.section-heading-mb0 {position: relative;z-index: 1;}
+@media only screen and (max-width:767px) {
+	.section-heading {margin-bottom:0}
+}
+.section-heading h2 {font-size: 48px;color:#363636;}
+.section-heading .line- {width:90px;height: 2px;background-color: #cb8670;display: block;margin-bottom: 40px;}
+
+@media only screen and (min-width:992px) and (max-width:1199px) {
+	.section-heading h2 {font-size: 40px;}
+}
+@media only screen and (min-width:768px) and (max-width:991px) {
+	.section-heading h2 {font-size: 36px;}
+}
+@media only screen and (max-width:767px) {
+	.section-heading h2 {font-size: 24px;}
+}
+.section-heading > h5.banner {color:#296AA6;}
+.section-heading > h5.banner  small {color:#666;}
+
+.section-text {position: relative;z-index: 1;margin-bottom:30px;}
+.section-text p {margin-bottom: 0;line-height:1.4;}
+
+
+
+/********************************************************
+:: 3.4.1 Card Section CSS
+********************************************************/
+.card-title {font-weight:300 !important;}
+.card.no-border {border:none !important;}
+.card-body {font-size:0.875rem;line-height:1.8;font-weight:300;}
+.card-body p.card-text {text-align:left:display:block;}
+@media only screen and (max-width:767px) {
+	.card-body h3 {font-size:22px;}
+}
+
+
+
+/********************************************************
+:: 3.5.0 Content Area CSS
+********************************************************/
+
+/* 연혁 */
+.nav-tabs .history {}
+.nav-tabs h4 {font-weight:300 !important;}
+.history {}
+.history h3 {border-bottom:1px solid #ccc;padding-bottom:20px;margin-bottom:20px;}
+.history li {margin:0px 0px 15px;}
+.history span {}
+
+
+/********************************************************
+:: 3.5.0 Preloader CSS
+********************************************************/
+.preloader {background-color: #ffffff;width:100%;height: 100%;position: fixed;top: 0;left: 0;right: 0;z-index: 9999;}
+.preloader .cssload-container {display: block;width:97px;}
+.preloader .cssload-loading i {width:19px;height: 19px;display: inline-block;border-radius: 50%;background: #cb8670;}
+.preloader .cssload-loading i:first-child {opacity: 0;animation: cssload-loading-ani2 0.58s linear infinite;-o-animation: cssload-loading-ani2 0.58s linear infinite;-ms-animation: cssload-loading-ani2 0.58s linear infinite;-webkit-animation: cssload-loading-ani2 0.58s linear infinite;-moz-animation: cssload-loading-ani2 0.58s linear infinite;transform: translate(-19px);-o-transform: translate(-19px);-ms-transform: translate(-19px);-webkit-transform: translate(-19px);-moz-transform: translate(-19px);}
+.preloader .cssload-loading i:nth-child(2),
+.preloader .cssload-loading i:nth-child(3) {animation: cssload-loading-ani3 0.58s linear infinite;-o-animation: cssload-loading-ani3 0.58s linear infinite;-ms-animation: cssload-loading-ani3 0.58s linear infinite;-webkit-animation: cssload-loading-ani3 0.58s linear infinite;-moz-animation: cssload-loading-ani3 0.58s linear infinite;}
+.preloader .cssload-loading i:last-child {animation: cssload-loading-ani1 0.58s linear infinite;-o-animation: cssload-loading-ani1 0.58s linear infinite;-ms-animation: cssload-loading-ani1 0.58s linear infinite;-webkit-animation: cssload-loading-ani1 0.58s linear infinite;-moz-animation: cssload-loading-ani1 0.58s linear infinite;}
+@keyframes cssload-loading-ani1 {100% {transform: translate(39px);opacity: 0;}
+}
+@-o-keyframes cssload-loading-ani1 {100% {-o-transform: translate(39px);opacity: 0;}
+}
+@-ms-keyframes cssload-loading-ani1 {100% {-ms-transform: translate(39px);opacity: 0;}
+}
+@-webkit-keyframes cssload-loading-ani1 {100% {-webkit-transform: translate(39px);opacity: 0;}
+}
+@-moz-keyframes cssload-loading-ani1 {100% {-moz-transform: translate(39px);opacity: 0;}
+}
+@keyframes cssload-loading-ani2 {100% {transform: translate(19px);opacity: 1;}
+}
+@-o-keyframes cssload-loading-ani2 {100% {-o-transform: translate(19px);opacity: 1;}
+}
+@-ms-keyframes cssload-loading-ani2 {100% {-ms-transform: translate(19px);opacity: 1;}
+}
+@-webkit-keyframes cssload-loading-ani2 {100% {-webkit-transform: translate(19px);opacity: 1;}
+}
+@-moz-keyframes cssload-loading-ani2 {100% {-moz-transform: translate(19px);opacity: 1;}
+}
+@keyframes cssload-loading-ani3 {100% {transform: translate(19px);}
+}
+@-o-keyframes cssload-loading-ani3 {100% {-o-transform: translate(19px);}
+}
+@-ms-keyframes cssload-loading-ani3 {100% {-ms-transform: translate(19px);}
+}
+@-webkit-keyframes cssload-loading-ani3 {100% {-webkit-transform: translate(19px);}
+}
+@-moz-keyframes cssload-loading-ani3 {100% {-moz-transform: translate(19px);}
+}
+
+
+/********************************************************
+:: 3.7.0 ScrollUp
+********************************************************/
+#scrollUp {background-color: #cb8670;border-radius: 0;bottom: 50px;box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.3);color: #ffffff;font-size: 24px;height: 40px;line-height: 40px;right: 50px;text-align: center;width:40px;-webkit-transition-duration: 500ms;transition-duration: 500ms;}
+#scrollUp:hover, #scrollUp:focus {background-color: #363636;}
+
+
+/********************************************************
+:: 3.8.0 Button & Button group
+********************************************************/
+/*
+.palatin-btn {background-color: #cb8670;-webkit-transition-duration: 500ms;transition-duration: 500ms;position: relative;z-index: 1;display: inline-block;min-width:123px;height: 53px;color: #ffffff;border: none;border-radius: 0;padding: 0 30px;font-size: 16px;line-height: 53px;text-transform: capitalize;}
+.palatin-btn:hover, .palatin-btn:focus {font-size: 16px;background-color: #363636;color: #ffffff;}
+.palatin-btn.btn-2 {background-color: #363636;color: #ffffff;}
+.palatin-btn.btn-2:hover, .palatin-btn.btn-2:focus {font-size: 16px;background-color: #cb8670;color: #ffffff;}
+.palatin-btn.btn-3 {background-color: #ffffff;color: #cb8670;border: 2px solid #cb8670;height: 49px;line-height: 48px;}
+.palatin-btn.btn-3:hover, .palatin-btn.btn-3:focus {font-size: 16px;background-color: #cb8670;color: #ffffff;}
+*/
+.buttons {}
+@media only screen and (max-width:767px) {
+	.buttons.form-inline {display:block !important;}
+	.buttons .form-row {margin:0px;}
+	.buttons .form-row .col-sm {margin:0px 0px 0.25rem 0px;padding-left:0px !important;padding-right:0px !important;}
+	.buttons .form-row .col-sm:last-child {margin-bottom:0px !important;}
+}
+
+
+/********************************************************
+:: 5.0 Main > Slide CSS
+********************************************************/
+.hero-slides {position: relative;z-index: 1;}
+.hero-slides .owl-dots {display: -webkit-box;display: -ms-flexbox;display: flex;position: absolute;bottom: 50px;left: 4%;}
+@media only screen and (min-width:992px) and (max-width:1199px) {
+	.hero-slides .owl-dots {bottom:100px;left:1%;}
+}
+@media only screen and (min-width:768px) and (max-width:991px) {
+	/* .hero-slides .owl-dots {bottom:80px;left:5px;-webkit-box-orient: horizontal;-webkit-box-direction: reverse;-ms-flex-direction: column;flex-direction: column;} */
+	.hero-slides .owl-dots {bottom:90px;left:5px;}
+}
+@media only screen and (max-width:767px) {
+	.hero-slides .owl-dots {bottom:70px;}
+}
+.hero-slides .owl-dots .owl-dot {-webkit-transition-duration: 300ms;transition-duration: 300ms;border: 2px solid transparent;background-color: transparent;display: block;  padding: 3px 5px;color: #ffffff;font-size: 14px; }
+.hero-slides .owl-dots .owl-dot.active, .hero-slides .owl-dots .owl-dot:hover, .hero-slides .owl-dots .owl-dot:focus {color: #ffffff;background-color: #1b3f4c;border: 2px solid #cb8670;box-shadow: none;}
+
+.single-hero-slide {width:100%;height: 950px;position: relative;z-index: 1;overflow: hidden;}
+@media only screen and (min-width:992px) and (max-width:1199px) {
+	.single-hero-slide {height: 800px;}
+}
+@media only screen and (min-width:768px) and (max-width:991px) {
+	.single-hero-slide {height: 750px;}
+}
+@media only screen and (max-width:767px) {
+	.single-hero-slide {height: 750px;}
+}
+.single-hero-slide .slide-img {position: absolute;width:100%;height: 600px;z-index: -10;left: 0;right: 0;top: 0;bottom: 0;}
+.single-hero-slide .hero-slides-content {display: inline-block;padding: 60px 50px;background-color: rgba(0, 0, 0, 0.63);border: 2px solid #cb8670;text-align: center;}
+@media only screen and (min-width:992px) and (max-width:1199px) {
+	.single-hero-slide .hero-slides-content {padding: 40px 20px;}
+}
+@media only screen and (min-width:768px) and (max-width:991px) {
+	.single-hero-slide .hero-slides-content {padding: 30px 20px;}
+}
+@media only screen and (max-width:767px) {
+	.single-hero-slide .hero-slides-content {padding: 20px;}
+}
+.single-hero-slide .hero-slides-content .line {width:90px;height: 2px;background-color: #cb8670;margin: 0 auto 30px;}
+.single-hero-slide .hero-slides-content h2 {position: relative;z-index: 1;font-size: 72px;color: #ffffff;margin-bottom:0px;display: inline-block;}
+@media only screen and (min-width:992px) and (max-width:1199px) {
+	.single-hero-slide .hero-slides-content h2 {font-size: 48px;}
+}
+@media only screen and (min-width:768px) and (max-width:991px) {
+	.single-hero-slide .hero-slides-content h2 {font-size: 36px;}
+}
+@media only screen and (max-width:767px) {
+	.single-hero-slide .hero-slides-content h2 {font-size: 30px;}
+}
+.single-hero-slide .hero-slides-content p {font-size: 14px;color: #ffffff;}
+.hero-slides .owl-item.active .single-hero-slide .slide-img {-webkit-animation: slide 20s linear infinite;animation: slide 20s linear infinite;}
+@-webkit-keyframes slide {0% {-webkit-transform: scale(1);transform: scale(1);}
+	50% {-webkit-transform: scale(1.2);transform: scale(1.2);}
+	100% {-webkit-transform: scale(1);transform: scale(1);}
+}
+@keyframes slide {0% {-webkit-transform: scale(1);transform: scale(1);}
+	50% {-webkit-transform: scale(1.2);transform: scale(1.2);}
+	100% {-webkit-transform: scale(1);transform: scale(1);}
+}
+
+
+/********************************************************
+:: 15.0 Popup Area CSS
+********************************************************/
+.popup-dialog {position: relative;width:auto;margin:1rem;pointer-events: none;}
+.popup-content {
+		position: relative;display: -ms-flexbox;display: flex;-ms-flex-direction: column;flex-direction: column;width:100%;
+		pointer-events: auto;background-color: #fff;background-clip: padding-box;border: 1px solid rgba(0,0,0,.2);border-radius: .3rem;outline: 0;
+}
+.popup-header {
+	display: -ms-flexbox;display: flex;-ms-flex-align: start;align-items: flex-start;-ms-flex-pack: justify;justify-content: space-between;
+	padding: 1rem;border-bottom: 1px solid #e9ecef;border-top-left-radius: .3rem;border-top-right-radius: .3rem;
+	background-color: #0e53a2 ;
+}
+.popup-header h5{ color:#fff!important;
+}
+.popup-body {position: relative;-ms-flex: 1 1 auto;flex: 1 1 auto;padding: 1rem;min-height:400px;}
+.popup-footer {display: -ms-flexbox;display: flex;-ms-flex-align: center;align-items: center;-ms-flex-pack: end;justify-content: flex-end;padding: 10px; border-top: 1px solid #70a2d5; background-color: #cfddec; font-size: 13px!important;}
+
+
+/********************************************************
+:: 16.0 Search AreaCSS
+********************************************************/
+.form-search {}
+@media only screen and (max-width:767px) {
+	.form-search.form-inline {display:block !important;}
+	.form-search .form-row {margin:0px;}
+	.form-search .form-row .col-sm {margin:0px 0px 0.25rem 0px;padding-left:0px !important;padding-right:0px !important;}
+	.form-search .form-row .col-sm:last-child {margin-bottom:0px !important;}
+	/*
+	.form-search .form-row > .col,
+	.form-search .form-row > [class*=col-] {margin:0px 0px 0.25rem 0px;padding-right:0px !important;padding-left:-30px !important;}
+	.form-search .form-row > .col:last-child ,
+	.form-search .form-row > [class*=col-]:last-child  {margin-bottom:0px !important;}
+	*/
+}
+
+
+
+/********************************************************
+:: 18.1.0 Single Cool Facts CSS
+********************************************************//*
+.single-cool-fact {position: relative;z-index: 1;width:200px;padding: 35px 15px;border: 2px solid #cb8670;text-align: center;background-color: #363636;margin: 0 auto;-webkit-transition-duration: 500ms;transition-duration: 500ms;}
+.single-cool-fact .scf-text i {-webkit-transition-duration: 500ms;transition-duration: 500ms;display: block;font-size: 70px;margin-bottom: 10px;color: #cb8670;}
+.single-cool-fact .scf-text h2 {font-size: 48px;margin-bottom: 5px;color: #ffffff;}
+@media only screen and (min-width:992px) and (max-width:1199px) {
+	.single-cool-fact .scf-text h2 {font-size: 48px;}
+}
+@media only screen and (min-width:768px) and (max-width:991px) {
+	.single-cool-fact .scf-text h2 {font-size: 36px;}
+}
+@media only screen and (max-width:767px) {
+	.single-cool-fact .scf-text h2 {font-size: 30px;}
+}
+.single-cool-fact .scf-text p {font-size: 14px;margin-bottom: 0;color: #ffffff;line-height: 1;}
+.single-cool-fact:hover, .single-cool-fact:focus {background-color: #cb8670;}
+.single-cool-fact:hover .scf-text i, .single-cool-fact:focus .scf-text i {color: #ffffff;}
+*/
+
+
+/* :: 18.2.0 Accordians Area CSS */
+/*
+.single-accordion.panel {background-color: #ffffff;border: 0 solid transparent;border-radius: 4px;box-shadow: 0 0 0 transparent;margin-bottom: 15px;}
+.single-accordion:last-of-type {margin-bottom: 0;}
+.single-accordion h6 {margin-bottom: 0;}
+.single-accordion h6 a {background-color: #cb8670;border-radius: 0;border: 2px solid #cb8670;color: #ffffff;display: block;margin: 0;padding: 20px 70px 20px 30px;position: relative;font-size: 14px;text-transform: capitalize;}
+.single-accordion h6 a span {background: transparent;-webkit-transition-duration: 500ms;transition-duration: 500ms;font-size: 10px;position: absolute;right: 0;text-align: center;top: 0;width:58px;height: 100%;color: #ffffff;line-height: 58px;}
+.single-accordion h6 a span.accor-open {opacity: 0;}
+.single-accordion h6 a.collapsed {-webkit-transition-duration: 500ms;transition-duration: 500ms;background-color: #ffffff;color: #7d7d7d;border: 2px solid #cb8670;}
+.single-accordion h6 a.collapsed span {color: #7d7d7d;}
+.single-accordion h6 a.collapsed span.accor-close {opacity: 0;}
+.single-accordion h6 a.collapsed span.accor-open {opacity: 1;}
+.single-accordion .accordion-content {border-top: 0 solid transparent;box-shadow: none;padding: 30px 15px 5px;}
+.single-accordion .accordion-content p {margin-bottom: 0;}
+*/
+
+
+/********************************************************
+:: 19.0 Body Layout Area CSS
+********************************************************/
+.body-area {position;relative;margin-top:100px;padding:50px 0px 50px;}
+.body-area > .container {border:1px solid blue;}
+
+
+/********************************************************
+:: 20.0 Table Area CSS
+********************************************************/
+/* table.table th {border-top-color: #0069d9;border-bottom:0px !important;background:#F0F0F0;text-align:center;font-weight:500;} */
+table.table th {background:#F0F0F0;text-align:center;font-weight:500;border-color:#DEE2E6;border-width:0  1px 1px  0;}
+
+/* table.table-bordered {font-size:14px !important;border-top:3px solid #0069d9 !important;} */
+table.table-bordered {font-size:14px !important;border:0px;}
+table.table-bordered thead {}
+table.table-bordered tbody {border-style: solid;border-color:#DEE2E6;border-width:1px 0 0 0;}
+table.table-bordered th,
+table.table-bordered td {border-width:0  1px 1px  0;vertical-align: middle;}
+table.table-bordered th {font-weight:500 !important;background:#F0F0F0;}
+table.table-bordered td {font-weight:300 !important;}
+table.table-bordered tr th:first-child,
+table.table-bordered tr td:first-child {border-left:0px;}
+table.table-bordered th:last-child, table.table-bordered td:last-child,
+table.table-bordered th.rb-none, table.table-bordered td.rb-none {border-right:0px !important;}
+table.table-bordered th.bg-bule-1 {background:#ebf1fc !important;}
+table.table-bordered th.bg-bule-2 {background:#ebf2fa !important;}
+/* rowspan 이 불가능한것을 해결하기 위하여 */
+table.table-bordered th.noline-b,
+table.table-bordered td.noline-b {border-bottom:0px !important;}
+table.table-bordered th.disp-no {}
+@media screen and (max-width:767px) {
+	table.table-bordered th.disp-no {display:none !important;}
+}
+table.table-bordered tr th .form-check, table.table-bordered tr td .form-check {height:100%;}
+table.table-bordered tr th .form-check-label, table.table-bordered tr td .form-check-label {margin-top:6px;margin-bottom:6px;}
+
+
+/********************************************************
+table : input form
+********************************************************/
+/* table 형식의 테이블 디자인 :no-gutters 와 같이 사용 */
+/* table.table-form {border-left:0px;border-right:0px;} */
+table.table-form tr th,
+table.table-form tr td {padding-left:7px !important; padding-right:7px !important; vertical-align: middle;font-weight:300 !important; font-size:14px !important;border-color:#DEE2E6;}
+table.table-form tr th:first-child,
+table.table-form tr td:first-child {border-left:0px;}
+table.table-form tr th:last-child,
+table.table-form tr td:last-child {border-right:0px;}
+table.table-form tr th .form-check-inline,
+table.table-form tr td .form-check-inline {margin-top:4px;margin-bottom:4px;}
+/* .table-wrapper-scroll-y {display: block;max-height:400px;overflow-y: auto;-ms-overflow-style: -ms-autohiding-scrollbar;} 	삭제금지*/
+.table-wrapper-scroll-y {display: block;overflow-y: auto;-ms-overflow-style: -ms-autohiding-scrollbar;
+	max-height:calc(100vh - 200px);
+}
+
+.table-t-b1 {border-top:1px solid #0069d9;}
+
+th.w-5, td.w-5 {width:5%;} th.w-10, td.w-10 {width:10%;} th.w-15, td.w-15 {width:15%;} th.w-20, td.w-20 {width:20%;}
+th.w-25, td.w-25 {width:25%;} th.w-30, td.w-30 {width:30%;} th.w-35, td.w-35 {width:35%;} th.w-40, td.w-40 {width:40%;}
+th.w-45, td.w-45 {width:45%;} th.w-50, td.w-50 {width:50%;} th.w-55, td.w-55 {width:55%;} th.w-60, td.w-60 {width:60%;}
+th.w-65, td.w-65 {width:65%;} th.w-70, td.w-70 {width:70%;} th.w-75, td.w-75 {width:75%;} th.w-80, td.w-80 {width:80%;}
+th.w-85, td.w-85 {width:85%;} th.w-90, td.w-90 {width:90%;} th.w-95, td.w-95 {width:95%;} th.w-100, td.w-100 {width:100%;}
+
+
+
+/********************************************************
+:: 30.0 Bootstrap CSS Redifinition
+********************************************************/
+.form-group .form-check label.form-check-label,
+.form-group label.col-form-label {font-size:0.875rem;}
+
+.btn {font-weight:400;}
+textarea:focus, input:focus, a:focus {outline: none !important;-webkit-box-shadow: none !important;-moz-box-shadow: none !important;-o-box-shadow: none;box-shadow: none !important;}
+/*@media only screen and (max-width:767px) {
+  .btn-group {float:none !important; display: block;text-align: center;}
+}*/
+.row.nomargin {margin-left:0px;margin-right:0px;}
+.nav-link.active {color:#172285 !important; font-weight:600;}
+/* 아래 내용 머죠??
+@media screen and (max-width:767px) {
+	.btn {Text-align : center;}
+}
+*/
+.table-responsive {display: table;}
+
+
+/********************************************************
+:: 40.0 Added CSS
+********************************************************/
+.nospacing {padding:0 !important;margin:0 !important;}
+
+/* row : remove padding */
+.row.nopadding {padding:0 !important;margin:0 !important;}
+.row.nopadding > [class*="col-"] {
+		padding-left: 0 !important;
+		padding-right: 0 !important;
+}
+.no-gutter.row,
+.no-gutter.container,
+.no-gutter.container-fluid {margin-left: 0;margin-right: 0;}
+.no-gutters.row,
+.no-gutters.container,
+.no-gutters.container-fluid {margin-left: 0;margin-right: 0;}
+.no-gutters > [class^="col-"] {padding-left: 0;padding-right: 0;}
+
+tr.row.nomargin th, tr.row.nomargin td {margin-left:0px;margin-right:0px;}
+
+/* 전체화면 Modal */
+.modal-dialog.modal-fullsize {width:100%;min-width:100%;height: 100%;margin:0px;padding:15px;}
+.modal-content.modal-fullsize {height: auto;min-height:100%;border-radius: 0;}
+.no-padding {padding:0 !important;}
+.no-margin {margin:0 !important;}
+
+.text-title {color:#014099 !important;}
+.text-thin {font-weight:300 !important;}
+
+.bg-white {background-color: #ffffff !important;}
+.bg-dark {background-color: #000000 !important;}
+.bg-transparent {background-color: transparent !important;}
+.font-bold {font-weight: 600;}
+.font-normal {font-weight: 400;}
+.font-light {font-weight: 300;}
+
+.bg-overlay {position: relative;z-index: 2;background-position: center center;background-size: cover;}
+.bg-overlay::after {background-color: rgba(0, 0, 0, 0.63);position: absolute;z-index: -1;top: 0;left: 0;width:100%;height: 100%;content: "";}
+
+.bg-fixed {background-attachment: fixed !important;}
+
+.pagination .page-link {color: #141414;}
+@media only screen and (max-width:767px) {
+	.pagination .page-link {color: #141414; font-size: 12px!important;}
+}
+
+.btn.btn-square {border-radius: 0 !important;}
+.btn-group-xs > .btn, .btn-xs {padding:.6rem .4rem;font-size:.875rem;line-height:.5;border-radius:.2rem;}
+
+
+.text-8 {font-size:8px !important;}
+.text-10 {font-size:10px !important;}
+.text-12 {font-size:12px !important;}
+.text-14 {font-size:14px !important;}
+.text-16 {font-size:16px !important;}
+.text-18 {font-size:18px !important;}
+.text-20 {font-size:20px !important;}
+.text-24 {font-size:24px !important;}
+.text-30 {font-size:30px !important;}
+
+.nav.bg-change > li > a:not(.active):focus,
+.nav.bg-change > li > a:not(.active):hover { background-color: #eee; }
+
+.text-nonowrap {white-space:normal !important;}
+.text-keep {word-break:keep-all;white-space: nowrap;}
+.indent-list {padding-left:10px;}
+.indent-list::before {content:"· ";margin-left:-11px;}
+.txt_hide {position: absolute !important;  top: -9999px !important;  text-indent: -9999px !important;}
+
+
+
+.scroll-y-only {overflow-y: scroll;max-height:calc(100vh - 300px);overflow-x: hidden;}
+
+/** div 형식의 테이블 디자인 **/
+form.form-horizontal .form-inline {border-bottom:1px solid #ddd;padding-top:10px;padding-bottom:10px;}
+form.form-horizontal .form-group {padding-left:0px;padding-right:0px;}
+/* form.form-horizontal label.col-form-label {background:#F0F0F0;} */
+form.form-horizontal .form-group label.col-form-label {}
+/* select.form-control {line-height: 28px !important;height:20px !important;border:1px solid red;} */
+/*
+form.form-horizontal label[class*="col-"],
+form.form-horizontal input[class*="col-"],
+form.form-horizontal textarea[class*="col-"],
+form.form-horizontal div[class*="col-"] {padding:7px !important;border-bottom:1px solid #ddd;}
+*/
+
+.border-color-1 {border-color:#000 !important;}
+.border-color-2 {border-color:#444!important;}
+.border-color-3 {border-color:#888 !important;}
+.border-color-4 {border-color:#aaa !important;}
+
+*.required:after {color:#D9534F;content: " *";}
+
+/* :: 40.1 Input css */
+.form-control-inline {min-width:0;width:auto;display: inline;}
+
+/********************************************************
+:: 41.0 for Test, for Debug
+********************************************************/
+.brdRed {border:1px solid red !important;}
+.brdGreen {border:1px solid green !important;}
+.brdBlue {border:1px solid blue !important;}
+.brdYellow {border:1px solid yellow !important;}
+.brdBlack {border:1px solid black !important;}
+
+.bgRed {background:red !important;}
+.bgGreen {background:green !important;}
+.bgBlue {background:blue !important;}
+.bgYellow {background:yellow !important;}
+.bgBlack {background:black !important;}
+
+.image-scale {
+    position: relative;
+    transform: scale(1.1);
+    display: block;
+    transition: 0.5s;
+}

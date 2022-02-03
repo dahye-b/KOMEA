@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.komeaweb.com.service.impl.DisplayMapper">
+
+	<select id="YearComboList" parameterType="showVO" resultType="showVO">
+	<![CDATA[
+			SELECT
+				LEFT( OPMT_CLOS_DE , 4 ) AS DATA,
+				CONCAT(LEFT( OPMT_CLOS_DE , 4 ) , '년') AS LABEL
+			FROM
+				EXBI_REGIST_INFO
+			WHERE
+			LEFT( OPMT_CLOS_DE , 4 )  <  YEAR(NOW())
+		    UNION
+			SELECT
+				LEFT( EVENT_CLOS_DE , 4 ) AS DATA,
+				CONCAT(LEFT( EVENT_CLOS_DE , 4 ) , '년') AS LABEL
+			FROM
+				CNSLTEXHB_REGIST_INFO
+			WHERE
+			LEFT( EVENT_CLOS_DE , 4 )  <  YEAR(NOW())
+	]]>
+	</select>
+
+	<select id="LocComboList" parameterType="showVO" resultType="showVO">
+			SELECT 
+				CD_KOR AS DATA,
+				CD_KOR AS LABEL
+			FROM
+				CODEBOOK
+			WHERE
+				CD_DEC = 'LOC'
+	</select>
+
+	<select id="CodeBookList" parameterType="showVO" resultType="showVO">
+			SELECT 
+				''   		DATA,
+				'국가'  	LABEL
+			UNION ALL        
+			SELECT
+				CD_KOR DATA,
+				CD_KOR LABEL
+			FROM
+				CODEBOOK
+			WHERE
+			1=1
+			AND CD_DEC = #{cdDec}
+			AND USE_YN = 'Y'
+			ORDER BY LABEL
+	</select>
+
+
+</mapper>

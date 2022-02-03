@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.komeaweb.com.service.impl.ReqCompMapper">
+
+	<!-- 전시상담포털 > MyDesk > 사업참여관리 -->
+	<select id="SelectReqBizList" parameterType="showVO" resultType="showVO">
+			SELECT * FROM (
+                    	SELECT
+                        	E.EXBI_CD AS CODE ,
+                            E.EXBI_NM AS NAME ,
+                            '0' AS GUBUN,
+                            E.OPMT_PLACE AS PLACE ,
+                            E.OPMT_BEGIN_DE AS FROM_DATE ,
+                            E.OPMT_CLOS_DE AS CLOSE_DATE ,
+                            M.INSTT_NM AS INSTT_NM ,
+                            E.INSTT_MBER_CD ,
+                            DATE_FORMAT(E.INSERT_USER_DT, '%Y-%m-%d') REGIST_DATE ,
+                            E.PROGRS_STTUS ,
+                            ERI.SLCTN_YN ,
+                            ERI.SLCTN_YN AS SLCTN_TYPE ,		
+                            CB.CD_KOR PROGRS_STTUS_NM ,
+                            CB.CD_REF1 PROGRS_STTUS_CLS ,
+                            CASE WHEN ERI.SLCTN_YN = '' OR ERI.SLCTN_YN IS NULL THEN '진행'
+                            		WHEN ERI.SLCTN_YN = 'N'  THEN '탈락'
+                            		WHEN ERI.SLCTN_YN = 'Y' AND E.PROGRS_STTUS != '3'  THEN '선정'
+                            		WHEN ERI.SLCTN_YN = 'Y' AND E.PROGRS_STTUS = '3'  THEN '마감'
+                            		ELSE ''
+                              END AS SLCTN_TYPE_NM ,
+                            CASE WHEN ERI.SLCTN_YN = '' OR ERI.SLCTN_YN IS NULL THEN 'ing state'
+                            		WHEN ERI.SLCTN_YN = 'N'  THEN 'sRed state'
+                            		WHEN ERI.SLCTN_YN = 'Y' AND E.PROGRS_STTUS != '3'  THEN 'choice state'
+                            		WHEN ERI.SLCTN_YN = 'Y' AND E.PROGRS_STTUS = '3'  THEN 'end state'
+                            		ELSE ''
+                              END AS SLCTN_TYPE_CSS ,  
+                            CASE WHEN E.PROGRS_STTUS = '0' AND ERI.SLCTN_YN = 'N' THEN 'M'
+                            	WHEN E.PROGRS_STTUS = '0' AND ERI.SLCTN_YN = 'Y' THEN 'A'
+                            	<![CDATA[
+				                WHEN E.PROGRS_STTUS = '3' AND DATE_ADD(CONVERT(E.OPMT_CLOS_DE, DATE),INTERVAL 6 MONTH) > now() THEN 'ER'
+								WHEN E.PROGRS_STTUS = '3' AND DATE_ADD(CONVERT(E.OPMT_CLOS_DE, DATE),INTERVAL 6 MONTH) <= now() THEN 'AR'
+								]]>
+                            	ELSE '' END BUTTON_STAT,
+                            	'N'  AS MATCHING_CMPL_YN 
+                        FROM
+                            EXBI_REGIST_INFO E JOIN MBER_INFO M
+                                ON E.INSTT_MBER_CD = M.MBER_CD
+                                JOIN CODEBOOK CB
+                                ON CONCAT(E.PROGRS_STTUS , IFNULL(E.SLCTN_YN, '')) = CB.CD_ITEM
+                                AND CB.CD_DEC = 'PROGRS_STTUS'
+                                JOIN EXBI_REQST_INFO ERI
+                        		ON E.INSTT_MBER_CD = ERI.INSTT_MBER_CD
+                        		AND E.EXBI_CD = ERI.EXBI_CD
+               					<if test="mberCd != null and mberCd != ''">
+									AND ERI.ENTRPRS_MBER_CD = #{mberCd}
+								</if>
+                    UNION ALL 
+                    SELECT
+                    		C.CNSLTEXHB_CD AS CODE,
+                            C.EVENT_NM AS NAME ,
+                            '1' AS GUBUN,
+                            C.PLACE AS PLACE ,
+                            C.EVENT_BEGIN_DE AS FROM_DATE ,
+                            C.EVENT_CLOS_DE AS CLOSE_DATE ,
+                            M.INSTT_NM AS INSTT_NM ,
+                            C.INSTT_MBER_CD ,
+                            DATE_FORMAT(C.INSERT_USER_DT, '%Y-%m-%d') REGIST_DATE ,
+                            C.PROGRS_STTUS ,
+                            CRI.SLCTN_YN ,
+                            CRI.SLCTN_YN AS SLCTN_TYPE ,
+                            CB.CD_KOR PROGRS_STTUS_NM ,
+                            CB.CD_REF1 PROGRS_STTUS_CLS ,
+                            CASE WHEN CRI.SLCTN_YN = '' OR CRI.SLCTN_YN IS NULL THEN '진행'
+                            		WHEN CRI.SLCTN_YN = 'N'  THEN '탈락'
+                            		WHEN CRI.SLCTN_YN = 'Y' AND C.PROGRS_STTUS != '3'  THEN '선정'
+                            		WHEN CRI.SLCTN_YN = 'Y' AND C.PROGRS_STTUS = '3'  THEN '마감'
+                            		ELSE ''
+                              END AS SLCTN_TYPE_NM ,
+                            CASE WHEN CRI.SLCTN_YN = '' OR CRI.SLCTN_YN IS NULL THEN 'ing state'
+                            		WHEN CRI.SLCTN_YN = 'N'  THEN 'sRed state'
+                            		WHEN CRI.SLCTN_YN = 'Y' AND C.PROGRS_STTUS != '3'  THEN 'choice state'
+                            		WHEN CRI.SLCTN_YN = 'Y' AND C.PROGRS_STTUS = '3'  THEN 'end state'
+                            		ELSE ''
+                              END AS SLCTN_TYPE_CSS ,  
+                            CASE WHEN C.PROGRS_STTUS = '0' AND CRI.SLCTN_YN = 'N' THEN 'M'
+                            	WHEN C.PROGRS_STTUS = '0' AND CRI.SLCTN_YN = 'Y' THEN 'A'
+                            	<![CDATA[
+				                WHEN C.PROGRS_STTUS = '3' AND DATE_ADD(CONVERT(C.EVENT_CLOS_DE, DATE),INTERVAL 6 MONTH) > now() THEN 'ER'
+								WHEN C.PROGRS_STTUS = '3' AND DATE_ADD(CONVERT(C.EVENT_CLOS_DE, DATE),INTERVAL 6 MONTH) <= now() THEN 'AR'
+								]]>
+                            	ELSE '' END BUTTON_STAT ,
+                            	C.MATCHING_CMPL_YN AS MATCHING_CMPL_YN
+                        FROM
+                            CNSLTEXHB_REGIST_INFO C JOIN MBER_INFO M
+                                ON C.INSTT_MBER_CD = M.MBER_CD
+                                JOIN CODEBOOK CB
+                                ON CONCAT(C.PROGRS_STTUS , IFNULL(C.SLCTN_AT, '')) = CB.CD_ITEM
+                                AND CB.CD_DEC = 'PROGRS_STTUS'
+                                JOIN CNSLTEXHB_REQST_INFO CRI
+	                        	ON C.INSTT_MBER_CD = CRI.INSTT_MBER_CD
+	                        	AND C.CNSLTEXHB_CD = CRI.CNSLTEXHB_CD
+               					<if test="mberCd != null and mberCd != ''">
+									AND CRI.ENTRPRS_MBER_CD = #{mberCd}
+								</if>
+            ) O
+			WHERE 1=1
+			<if test="gb != null and gb != ''">
+				<choose>
+					<when test="gb == 0">
+						AND O.GUBUN = #{gb}
+					</when>
+					<when test="gb == 1">
+						AND O.GUBUN IN ( '1' , '2' )
+					</when>
+					<when test="gb == 2">
+						AND O.INSTT_MBER_CD = '1201405001'
+					</when>					
+					<otherwise>
+					</otherwise>
+				</choose>
+			</if>
+			<if test="searchKeyword != null and searchKeyword != ''">
+				AND O.NAME LIKE '%${searchKeyword}%'
+			</if>
+			<if test="year != null and year != ''">
+				AND O.CLOSE_DATE LIKE '%${year}%'
+			</if>
+			<if test="fromDate != null and fromDate != ''">
+			<![CDATA[
+				AND O.FROM_DATE <= REPLACE(#{fromDate},'-')
+				]]>
+			</if>
+			<if test="closeDate != null and closeDate != ''">
+			<![CDATA[
+				AND O.FROM_DATE > REPLACE(#{closeDate},'-')
+				]]>
+			</if>
+			<if test="slctnTypeNm != null and slctnTypeNm != ''">
+				AND SLCTN_TYPE_NM = #{slctnTypeNm}
+			</if>
+			<if test="progrsSttus != null and progrsSttus != '' and progrsSttus != '9'">
+				AND O.PROGRS_STTUS = #{progrsSttus}
+			</if>
+			ORDER BY CLOSE_DATE DESC
+			LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+	<select id="SelectReqBizListTotCnt" parameterType="showVO" resultType="int">
+		SELECT COUNT(*) cnt
+		FROM (
+                  	SELECT
+                       	E.EXBI_CD AS CODE ,
+                           E.EXBI_NM AS NAME ,
+                           '0' AS GUBUN,
+                           E.OPMT_PLACE AS PLACE ,
+                           E.OPMT_BEGIN_DE AS FROM_DATE ,
+                           E.OPMT_CLOS_DE AS CLOSE_DATE ,
+                           M.INSTT_NM AS INSTT_NM ,
+                           E.INSTT_MBER_CD ,
+                           DATE_FORMAT(E.INSERT_USER_DT, '%Y-%m-%d') REGIST_DATE ,
+                           E.PROGRS_STTUS ,
+                           ERI.SLCTN_YN ,
+                           ERI.SLCTN_YN AS SLCTN_TYPE ,		
+                           CB.CD_KOR PROGRS_STTUS_NM ,
+                           CB.CD_REF1 PROGRS_STTUS_CLS ,
+                           CASE WHEN ERI.SLCTN_YN = '' OR ERI.SLCTN_YN IS NULL THEN '진행'
+                           		WHEN ERI.SLCTN_YN = 'N'  THEN '탈락'
+                           		WHEN ERI.SLCTN_YN = 'Y' AND E.PROGRS_STTUS != '3'  THEN '선정'
+                           		WHEN ERI.SLCTN_YN = 'Y' AND E.PROGRS_STTUS = '3'  THEN '마감'
+                           		ELSE ''
+                             END AS SLCTN_TYPE_NM ,
+                           CASE WHEN ERI.SLCTN_YN = '' OR ERI.SLCTN_YN IS NULL THEN 'ing state'
+                           		WHEN ERI.SLCTN_YN = 'N'  THEN 'sRed state'
+                           		WHEN ERI.SLCTN_YN = 'Y' AND E.PROGRS_STTUS != '3'  THEN 'choice state'
+                           		WHEN ERI.SLCTN_YN = 'Y' AND E.PROGRS_STTUS = '3'  THEN 'end state'
+                           		ELSE ''
+                             END AS SLCTN_TYPE_CSS ,  
+                           CASE WHEN E.PROGRS_STTUS = '0' AND ERI.SLCTN_YN = 'N' THEN 'M'
+                           	WHEN E.PROGRS_STTUS = '0' AND ERI.SLCTN_YN = 'Y' THEN 'A'
+                           	<![CDATA[
+			                WHEN E.PROGRS_STTUS = '3' AND DATE_ADD(CONVERT(E.OPMT_CLOS_DE, DATE),INTERVAL 6 MONTH) > now() THEN 'ER'
+							WHEN E.PROGRS_STTUS = '3' AND DATE_ADD(CONVERT(E.OPMT_CLOS_DE, DATE),INTERVAL 6 MONTH) <= now() THEN 'AR'
+							]]>
+                           	ELSE '' END BUTTON_STAT,
+                           	'N'  AS MATCHING_CMPL_YN 
+                       FROM
+                           EXBI_REGIST_INFO E JOIN MBER_INFO M
+                               ON E.INSTT_MBER_CD = M.MBER_CD
+                               JOIN CODEBOOK CB
+                               ON CONCAT(E.PROGRS_STTUS , IFNULL(E.SLCTN_YN, '')) = CB.CD_ITEM
+                               AND CB.CD_DEC = 'PROGRS_STTUS'
+                               JOIN EXBI_REQST_INFO ERI
+                       		ON E.INSTT_MBER_CD = ERI.INSTT_MBER_CD
+                       		AND E.EXBI_CD = ERI.EXBI_CD
+              					<if test="mberCd != null and mberCd != ''">
+								AND ERI.ENTRPRS_MBER_CD = #{mberCd}
+							</if>
+                   UNION ALL 
+                   SELECT
+                   		C.CNSLTEXHB_CD AS CODE,
+                           C.EVENT_NM AS NAME ,
+                           '1' AS GUBUN,
+                           C.PLACE AS PLACE ,
+                           C.EVENT_BEGIN_DE AS FROM_DATE ,
+                           C.EVENT_CLOS_DE AS CLOSE_DATE ,
+                           M.INSTT_NM AS INSTT_NM ,
+                           C.INSTT_MBER_CD ,
+                           DATE_FORMAT(C.INSERT_USER_DT, '%Y-%m-%d') REGIST_DATE ,
+                           C.PROGRS_STTUS ,
+                           CRI.SLCTN_YN ,
+                           CRI.SLCTN_YN AS SLCTN_TYPE ,
+                           CB.CD_KOR PROGRS_STTUS_NM ,
+                           CB.CD_REF1 PROGRS_STTUS_CLS ,
+                           CASE WHEN CRI.SLCTN_YN = '' OR CRI.SLCTN_YN IS NULL THEN '진행'
+                           		WHEN CRI.SLCTN_YN = 'N'  THEN '탈락'
+                           		WHEN CRI.SLCTN_YN = 'Y' AND C.PROGRS_STTUS != '3'  THEN '선정'
+                           		WHEN CRI.SLCTN_YN = 'Y' AND C.PROGRS_STTUS = '3'  THEN '마감'
+                           		ELSE ''
+                             END AS SLCTN_TYPE_NM ,
+                           CASE WHEN CRI.SLCTN_YN = '' OR CRI.SLCTN_YN IS NULL THEN 'ing state'
+                           		WHEN CRI.SLCTN_YN = 'N'  THEN 'sRed state'
+                           		WHEN CRI.SLCTN_YN = 'Y' AND C.PROGRS_STTUS != '3'  THEN 'choice state'
+                           		WHEN CRI.SLCTN_YN = 'Y' AND C.PROGRS_STTUS = '3'  THEN 'end state'
+                           		ELSE ''
+                             END AS SLCTN_TYPE_CSS ,  
+                           CASE WHEN C.PROGRS_STTUS = '0' AND CRI.SLCTN_YN = 'N' THEN 'M'
+                           	WHEN C.PROGRS_STTUS = '0' AND CRI.SLCTN_YN = 'Y' THEN 'A'
+                           	<![CDATA[
+			                WHEN C.PROGRS_STTUS = '3' AND DATE_ADD(CONVERT(C.EVENT_CLOS_DE, DATE),INTERVAL 6 MONTH) > now() THEN 'ER'
+							WHEN C.PROGRS_STTUS = '3' AND DATE_ADD(CONVERT(C.EVENT_CLOS_DE, DATE),INTERVAL 6 MONTH) <= now() THEN 'AR'
+							]]>
+                           	ELSE '' END BUTTON_STAT ,
+                           	C.MATCHING_CMPL_YN AS MATCHING_CMPL_YN
+                       FROM
+                           CNSLTEXHB_REGIST_INFO C JOIN MBER_INFO M
+                               ON C.INSTT_MBER_CD = M.MBER_CD
+                               JOIN CODEBOOK CB
+                               ON CONCAT(C.PROGRS_STTUS , IFNULL(C.SLCTN_AT, '')) = CB.CD_ITEM
+                               AND CB.CD_DEC = 'PROGRS_STTUS'
+                               JOIN CNSLTEXHB_REQST_INFO CRI
+                        	ON C.INSTT_MBER_CD = CRI.INSTT_MBER_CD
+                        	AND C.CNSLTEXHB_CD = CRI.CNSLTEXHB_CD
+              					<if test="mberCd != null and mberCd != ''">
+								AND CRI.ENTRPRS_MBER_CD = #{mberCd}
+								</if>
+           ) O
+		WHERE 1=1
+		<if test="gb != null and gb != ''">
+			<choose>
+				<when test="gb == 0">
+					AND O.GUBUN = #{gb}
+				</when>
+				<when test="gb == 1">
+					AND O.GUBUN IN ( '1' , '2' )
+				</when>
+				<when test="gb == 2">
+					AND O.INSTT_MBER_CD = '1201405001'
+				</when>					
+				<otherwise>
+				</otherwise>
+			</choose>
+		</if>
+		<if test="searchKeyword != null and searchKeyword != ''">
+			AND O.NAME LIKE '%${searchKeyword}%'
+		</if>
+		<if test="year != null and year != ''">
+			AND O.CLOSE_DATE LIKE '%${year}%'
+		</if>
+		<if test="fromDate != null and fromDate != ''">
+		<![CDATA[
+			AND O.FROM_DATE <= REPLACE(#{fromDate},'-')
+			]]>
+		</if>
+		<if test="closeDate != null and closeDate != ''">
+		<![CDATA[
+			AND O.FROM_DATE > REPLACE(#{closeDate},'-')
+			]]>
+		</if>
+		<if test="slctnTypeNm != null and slctnTypeNm != ''">
+			AND SLCTN_TYPE_NM = #{slctnTypeNm}
+		</if>
+		<if test="progrsSttus != null and progrsSttus != '' and progrsSttus != '9'">
+			AND O.PROGRS_STTUS = #{progrsSttus}
+		</if>
+	</select>
+
+	<select id="SelectCnsltCompReq" parameterType="showVO" resultType="showVO">
+		SELECT A.*, B.*, C.*
+		FROM CNSLTEXHB_REGIST_INFO	A
+		JOIN CNSLTEXHB_REQST_INFO	B 
+		  ON A.INSTT_MBER_CD = B.INSTT_MBER_CD
+		 AND A.CNSLTEXHB_CD = B.CNSLTEXHB_CD
+		 AND A.CNSLTEXHB_CD = #{code}
+		 AND B.ENTRPRS_MBER_CD = #{entrprsMberCd}
+		LEFT OUTER JOIN CNSLTEXHB_REQST_FILE_INFO C
+		  ON A.INSTT_MBER_CD = C.INSTT_MBER_CD
+		 AND B.INSTT_MBER_CD = C.INSTT_MBER_CD
+		 AND A.CNSLTEXHB_CD = C.CNSLTEXHB_CD
+		 AND B.CNSLTEXHB_CD = C.CNSLTEXHB_CD
+		 AND B.ENTRPRS_MBER_CD = C.ENTRPRS_MBER_CD
+	</select>
+	
+	<select id="SelectExbiCompReq" parameterType="showVO" resultType="showVO">
+		SELECT A.*, B.*, (SELECT SPCE_BY_MG FROM EXBI_REGIST_INFO EB WHERE EB.EXBI_CD = #{code}) AS SPCE_BY_MG
+		FROM EXBI_REQST_INFO	A
+		  JOIN EXBI_REQST_FILE_INFO	B 
+		    ON A.EXBI_CD = B.EXBI_CD
+		   AND A.ENTRPRS_MBER_CD = B.ENTRPRS_MBER_CD
+		   AND A.EXBI_CD = #{code}
+		   AND A.ENTRPRS_MBER_CD = #{entrprsMberCd}
+	</select>
+
+	<select id="SelectCnsltResearchResult" parameterType="showVO" resultType="showVO">
+		SELECT CRI. * FROM CNSLTEXHB_CSNST_INFO CRI 
+		WHERE
+		    CRI.INSTT_MBER_CD = #{insttMberCd}
+		    AND CRI.CNSLTEXHB_CD = #{cnsltexhbCd}
+		    AND CRI.ENTRPRS_MBER_CD = #{entrprsMberCd}
+	</select>
+	
+	
+	<!-- 전시상담포털 > MyDesk > 참여입찰관리 -->
+	<select id="SelectReqBiddingList" parameterType="showVO" resultType="showVO">
+		SELECT * FROM (
+                  	SELECT A.REGIST_NO, A.BBSCTT_NO, A.MBER_CD, A.BSNM_RSCTFT_FILE_NM, A.BSNM_RSCTFT_FILE_PATH, A.BIDDING_FILE_NM,
+                  		   A.BIDDING_FILE_PATH, A.ETC_FILE_NM, A.ETC_FILE_PATH, A.BIDDING_STATUS, 
+                  		   ( SELECT CD_KOR FROM CODEBOOK WHERE CD_DEC = 'BIDDING_STATUS' AND CD_ITEM = A.BIDDING_STATUS)  BIDDING_STATUS_NM,
+				    	   A.INSERT_USER_ID, DATE_FORMAT(A.INSERT_USER_DT, '%Y-%m-%d') REGIST_DATE , A.INSERT_USER_DT, A.UPDATE_USER_ID, A.UPDATE_USER_DT,
+				    	   B.BBS_TY, B.SJ, B.CN, B.EVENT_GB, B.EVENT_CD, B.WRTER, B.WRITNG_DE, B.ATCH_FILE_NM, B.ATCH_FILE_COURS, B.ATCH_FILE_NM2,
+				    	   B.ATCH_FILE_COURS2, B.ATCH_FILE_NM3, B.ATCH_FILE_COURS3, B.ETC1, B.ETC2, B.ETC3, B.ETC4
+				    	   , DATE_FORMAT(STR_TO_DATE(B.ETC4, '%Y%m%d') , '%Y-%m-%d') AS TO_DATE, B.ETC5,
+				    	   CASE 
+				    	 		WHEN B.EVENT_GB = '0' THEN (SELECT CONCAT('[전시] ' , EXBI_NM) FROM EXBI_REGIST_INFO WHERE EXBI_CD = B.EVENT_CD)
+				         		WHEN B.EVENT_GB = '1' THEN (SELECT CONCAT('[상담] ' , EVENT_NM) FROM CNSLTEXHB_REGIST_INFO WHERE CNSLTEXHB_CD = B.EVENT_CD)
+				     	 		ELSE ''
+				      		END EVENT_NM,
+				      	   DATE_FORMAT( B.INSERT_USER_DT, '%Y-%m-%d')  FROM_DATE, (SELECT INSTT_NM FROM MBER_INFO WHERE MBER_CD = B.WRTER) INSTT_NM
+				  FROM BIDDING_REQST_INFO A
+				   JOIN ( SELECT * FROM BBS_CM WHERE BBS_TY = '2' ) B
+				   	ON A.REGIST_NO = B.REGIST_NO
+				   AND A.BBSCTT_NO = B.BBSCTT_NO
+				   <if test="mberCd != null and mberCd != ''">
+				   AND A.MBER_CD = #{mberCd}
+				   </if>
+           ) O
+		WHERE 1=1
+		<if test="eventGb != null and eventGb != ''">
+			AND O.EVENT_GB = #{eventGb}
+		</if>
+		<if test="biddingStatus != null and biddingStatus != ''">
+			AND O.BIDDING_STATUS = #{biddingStatus}
+		</if>
+		<if test="biddingStatusNm != null and biddingStatusNm != ''">
+			AND BIDDING_STATUS_NM = #{biddingStatusNm}
+		</if>
+		<if test="searchKeyword != null and searchKeyword != ''">
+			AND O.SJ LIKE '%${searchKeyword}%'
+		</if>
+		<if test="fromDate != null and fromDate != ''">
+			AND STR_TO_DATE(O.ETC4, '%Y%m%d') BETWEEN STR_TO_DATE(#{fromDate}, '%Y%m%d') AND STR_TO_DATE(#{closeDate}, '%Y%m%d')  
+		</if>
+       ORDER BY ETC4 ASC
+       LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+	
+	<select id="SelectReqBiddingListTotCnt" parameterType="showVO" resultType="int">
+			SELECT COUNT(*) cnt
+			FROM (
+                  	SELECT A.REGIST_NO, A.BBSCTT_NO, A.MBER_CD, A.BSNM_RSCTFT_FILE_NM, A.BSNM_RSCTFT_FILE_PATH, A.BIDDING_FILE_NM,
+                  		   A.BIDDING_FILE_PATH, A.ETC_FILE_NM, A.ETC_FILE_PATH, A.BIDDING_STATUS, 
+                  		   ( SELECT CD_KOR FROM CODEBOOK WHERE CD_DEC = 'BIDDING_STATUS' AND CD_ITEM = A.BIDDING_STATUS)  BIDDING_STATUS_NM,
+				    	   A.INSERT_USER_ID, DATE_FORMAT(A.INSERT_USER_DT, '%Y-%m-%d') REGIST_DATE , A.INSERT_USER_DT, A.UPDATE_USER_ID, A.UPDATE_USER_DT,
+				    	   B.BBS_TY, B.SJ, B.CN, B.EVENT_GB, B.EVENT_CD, B.WRTER, B.WRITNG_DE, B.ATCH_FILE_NM, B.ATCH_FILE_COURS, B.ATCH_FILE_NM2,
+				    	   B.ATCH_FILE_COURS2, B.ATCH_FILE_NM3, B.ATCH_FILE_COURS3, B.ETC1, B.ETC2, B.ETC3, B.ETC4
+				    	   , DATE_FORMAT(STR_TO_DATE(B.ETC4, '%Y%m%d') , '%Y-%m-%d') AS TO_DATE, B.ETC5,
+				    	   CASE 
+				    	 		WHEN B.EVENT_GB = '0' THEN (SELECT CONCAT('[전시] ' , EXBI_NM) FROM EXBI_REGIST_INFO WHERE EXBI_CD = B.EVENT_CD)
+				         		WHEN B.EVENT_GB = '1' THEN (SELECT CONCAT('[상담] ' , EVENT_NM) FROM CNSLTEXHB_REGIST_INFO WHERE CNSLTEXHB_CD = B.EVENT_CD)
+				     	 		ELSE ''
+				      		END EVENT_NM,
+				      	   DATE_FORMAT( B.INSERT_USER_DT, '%Y-%m-%d')  FROM_DATE, (SELECT INSTT_NM FROM MBER_INFO WHERE MBER_CD = B.WRTER) INSTT_NM
+				  FROM BIDDING_REQST_INFO A
+				   JOIN ( SELECT * FROM BBS_CM WHERE BBS_TY = '2' ) B
+				   	ON A.REGIST_NO = B.REGIST_NO
+				   AND A.BBSCTT_NO = B.BBSCTT_NO
+				   <if test="mberCd != null and mberCd != ''">
+				   AND A.MBER_CD = #{mberCd}
+				   </if>
+           ) O
+		WHERE 1=1
+		<if test="eventGb != null and eventGb != ''">
+			AND O.EVENT_GB = #{eventGb}
+		</if>
+		<if test="biddingStatus != null and biddingStatus != ''">
+			AND O.BIDDING_STATUS = #{biddingStatus}
+		</if>
+		<if test="biddingStatusNm != null and biddingStatusNm != ''">
+			AND BIDDING_STATUS_NM = #{biddingStatusNm}
+		</if>
+		<if test="searchKeyword != null and searchKeyword != ''">
+			AND O.SJ LIKE '%${searchKeyword}%'
+		</if>
+		<if test="fromDate != null and fromDate != ''">
+			AND STR_TO_DATE(O.ETC4, '%Y%m%d') BETWEEN STR_TO_DATE(#{fromDate}, '%Y%m%d') AND STR_TO_DATE(#{closeDate}, '%Y%m%d')  
+		</if>
+	</select>
+	
+	<select id="SelectReqBiddingInfo" parameterType="showVO" resultType="showVO">
+    	SELECT A.REGIST_NO, A.BBSCTT_NO, A.MBER_CD, A.BSNM_RSCTFT_FILE_NM, A.BSNM_RSCTFT_FILE_PATH, A.BIDDING_FILE_NM,
+    			A.BIDDING_FILE_PATH, A.ETC_FILE_NM, A.ETC_FILE_PATH, A.BIDDING_STATUS,
+    			( SELECT CD_KOR FROM CODEBOOK WHERE CD_DEC = 'BIDDING_STATUS' AND CD_ITEM = A.BIDDING_STATUS)  BIDDING_STATUS_NM,
+    			A.INSERT_USER_ID, DATE_FORMAT(A.INSERT_USER_DT, '%Y-%m-%d') REGIST_DATE , A.INSERT_USER_DT, A.UPDATE_USER_ID, A.UPDATE_USER_DT,
+    			B.BBS_TY, B.SJ, B.CN, B.EVENT_GB, B.EVENT_CD, B.WRTER, B.WRITNG_DE, B.ATCH_FILE_NM, B.ATCH_FILE_COURS, B.ATCH_FILE_NM2,
+    			B.ATCH_FILE_COURS2, B.ATCH_FILE_NM3, B.ATCH_FILE_COURS3, B.ETC1, B.ETC2, B.ETC3, B.ETC4,
+    			DATE_FORMAT(STR_TO_DATE(B.ETC4, '%Y%m%d') , '%Y-%m-%d') AS TO_DATE, B.ETC5,
+	    	   CASE 
+	    	 		WHEN B.EVENT_GB = '0' THEN (SELECT CONCAT('[전시] ' , EXBI_NM) FROM EXBI_REGIST_INFO WHERE EXBI_CD = B.EVENT_CD)
+	         		WHEN B.EVENT_GB = '1' THEN (SELECT CONCAT('[상담] ' , EVENT_NM) FROM CNSLTEXHB_REGIST_INFO WHERE CNSLTEXHB_CD = B.EVENT_CD)
+	     	 		ELSE ''
+	      		END EVENT_NM,
+	      	   DATE_FORMAT( B.INSERT_USER_DT, '%Y-%m-%d')  FROM_DATE, (SELECT INSTT_NM FROM MBER_INFO WHERE MBER_CD = B.WRTER) INSTT_NM
+		  FROM BIDDING_REQST_INFO A
+		   JOIN ( SELECT * FROM BBS_CM WHERE BBS_TY = '2' ) B
+		   	 ON A.REGIST_NO = B.REGIST_NO
+		    AND A.BBSCTT_NO = B.BBSCTT_NO
+			AND A.MBER_CD = #{mberCd}
+		    AND A.REGIST_NO = #{registNo}
+		    AND A.BBSCTT_NO = #{bbscttNo}
+	</select>
+	
+	<select id="SelectBiddingResultInfo" parameterType="showVO" resultType="showVO">
+		SELECT A.SJ, A.REGIST_NO, A.BBSCTT_NO, B.* FROM BBS_CM A
+	    LEFT JOIN BIDDING_RESULT_INFO B
+	              ON A.REGIST_NO = B.REGIST_NO
+	            AND A.BBSCTT_NO = B.BBSCTT_NO
+			    AND B.MBER_CD = #{mberCd}
+	            AND A.BBS_TY = '2'
+			WHERE 1 = 1   
+			    AND A.REGIST_NO = #{registNo}
+			    AND A.BBSCTT_NO = #{bbscttNo}
+	</select>
+	
+	<!-- 전시상담포털 > MyDesk > 입찰참여관리 : 일정등록 -->
+	<insert id="InsertBiddingResultInfo" parameterType="showVO">
+		INSERT INTO BIDDING_RESULT_INFO (REGIST_NO, BBSCTT_NO, MBER_CD, INSERT_USER_ID, INSERT_USER_DT, UPDATE_USER_ID, UPDATE_USER_DT, REMARKS)
+		VALUES (#{registNo}, #{bbscttNo}, #{mberCd}, #{insertUserId}, #{insertUserDt}, #{updateUserId}, #{updateUserDt}, #{remarks})
+	</insert>
+
+	<!-- 전시상담포털 > MyDesk > 입찰참여관리 : 일정등록 파일 업로드 -->
+	<update id="UpdateBiddingResultInfoFile" parameterType="hashMap">
+	    UPDATE BIDDING_RESULT_INFO
+	    <set>
+			<if test="resultFileNm1 != null">RESULT_FILE_NM1 = #{resultFileNm1},</if>
+			<if test="resultFilePath1 != null">RESULT_FILE_PATH1 = #{resultFilePath1},</if>
+			<if test="resultFileNm2 != null">RESULT_FILE_NM2 = #{resultFileNm2},</if>
+			<if test="resultFilePath2 != null">RESULT_FILE_PATH2 = #{resultFilePath2},</if>
+		    <if test="updateUserId != null">UPDATE_USER_ID=#{updateUserId},</if>
+		    <if test="updateUserId != null">UPDATE_USER_DT=NOW()</if>
+	    </set>
+	    WHERE MBER_CD = #{mberCd}
+		  AND REGIST_NO = #{registNo}
+		  AND BBSCTT_NO = #{bbscttNo}
+	</update>
+	
+	<update id="DeleteBiddingResultInfoFile" parameterType="showVO">
+	    UPDATE BIDDING_RESULT_INFO
+	    SET ${tmp1} = NULL, ${tmp2} = NULL
+	    WHERE MBER_CD = #{mberCd}
+		  AND REGIST_NO = #{registNo}
+		  AND BBSCTT_NO = #{bbscttNo}
+	</update>
+</mapper>

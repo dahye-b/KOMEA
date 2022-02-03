@@ -1,0 +1,204 @@
+/* 스타일시트 마스터 파일 : 사용자 CSS에서 공동사항만 추려옴 */
+/* =========== Index of CSS ===========
+:: 1.0 Import Fonts
+:: 2.0 Import All CSS
+:: 3.0 Base CSS
+:: 4.0 Login CSS
+:: 5.0 Page Title CSS
+
+:: 20.0 added by kbh0007
+:: 21.0 Redefinition OR Modification NOW-UI-Dashboard
+*/
+
+
+/********************************************************
+:: 1.0 Import Fonts 
+********************************************************/
+/* @import url(css/bootstrap.min.css);		이미 소스에서 포함됨 */
+/* @font-face {font-family: 'FuturaLT-Book';src: url("fonts/FuturaLT-Book.eot?#iefix") format("embedded-opentype"), url("fonts/FuturaLT-Book.woff") format("woff"), url("fonts/FuturaLT-Book.ttf") format("truetype"), url("fonts/FuturaLT-Book.svg#FuturaLT-Book") format("svg");font-weight: normal;font-style: normal;} */
+/* 한글 Noto Sans Import */
+/* font-weight:100, 300, 400, 500, 700, 900 */
+/* @import url(http://fonts.googleapis.com/earlyaccess/notosanskr.css); */
+
+/********************************************************
+:: 2.0 Import All CSS
+********************************************************/
+
+/********************************************************
+:: 3.0 Base CSS
+********************************************************/
+* {margin: 0;padding: 0;}
+html {font-size:16px;}
+body {font-family: "Noto Sans KR";font-size:0.875em;font-weight:300;}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {color: #363636;line-height:1.3;font-weight:500;}
+p {color: #7d7d7d;font-size: 14px;line-height: 2.1;font-weight: 400;word-break:break-all}
+a,
+a:hover,
+a:focus {-webkit-transition-duration: 500ms;transition-duration: 500ms;text-decoration: none;outline: 0 solid transparent;color: #141414;font-weight: 400;font-size: 14px;}
+i {color:#444;}
+b, strong {font-weight:400;}
+ul, ol {margin: 0;}
+ul li,
+ol li {list-style: none;}
+img {height: auto;max-width: 100%;}
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {display:block}
+/* #hd ul, nav ul, #ft ul {margin:0;padding:0;list-style:none} */
+legend {position:absolute;margin:0;padding:0;font-size:0;line-height:0;text-indent:-9999em;overflow:hidden}
+label, input, button, select, img {vertical-align:middle}
+input, button {margin:0;padding:0;font-family: 'Noto Sans KR', dotum;font-size:1em}
+button {cursor:pointer}
+textarea, select {font-family: 'Noto Sans KR', dotum;font-size:1em}
+select {margin:0}
+pre {overflow-x:scroll;font-size:1.1em}
+
+
+/********************************************************
+:: 4.0 Login CSS
+********************************************************/
+.login-block {
+	background: #e1e1e1;  /* fallback for old browsers */
+	background: -webkit-linear-gradient(to bottom, #e1e1e1, #ffffff);  /* Chrome 10-25, Safari 5.1-6 */
+	background: linear-gradient(to bottom, #e1e1e1, #ffffff); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+	width:100%;height:100vh;display:flex; align-items:center;
+}
+.container {background:#fff; border-radius: 10px; box-shadow:15px 15px 0px rgba(0,0,0,0.1);}
+
+.login-sec {padding: 50px 30px; position:relative;}
+.login-sec h2 {margin-bottom:30px; font-weight:500; font-size:30px;}
+.login-sec h2:after {content:" "; width:100px; height:5px; background:#F96332; display:block; margin-top:20px; border-radius:3px; margin-left:auto;margin-right:auto}
+.login-sec .form-check-inline .btn-login {margin-left:20px;}
+.login-sec .copy-text {position:absolute; width:80%; bottom:20px; font-size:13px; text-align:center;}
+.login-sec .copy-text a {font-weight:500;}
+
+.carousel-inner {border-radius:0 10px 10px 0;}
+.carousel-caption {text-align:left; left:5%;}
+
+.banner-sec {min-height:500px; border-radius: 0 10px 10px 0; padding:0;}
+.banner-text {width:90%; position:absolute; bottom:40px; padding-left:20px;}
+.banner-text h2 {color:#fff; font-weight:500;text-shadow: 0 0 3px #333;}
+.banner-text h2:after {content:" "; width:100px; height:5px; background:#F96332; display:block; margin-top:20px; border-radius:3px;}
+.banner-text p {font-size:16px;font-weight:300;color:#fff;text-shadow: 0 0 3px #333;}
+
+
+
+/********************************************************
+:: 5.0 Page Title CSS
+********************************************************/
+/*
+.page-header h1
+		<div class="page-header"> 
+			<h1>
+			공지사항 <small>목록</small>
+			</h1>
+			<ol class="breadcrumb">
+				<li><a href="#">Home</a></li>
+				<li><a href="#">Forms</a></li>
+				<li class="active">Data</li>
+			</ol> 									
+		</div>
+*/
+
+
+/********************************************************
+:: 20.0 added by kbh0007
+********************************************************/
+
+
+/********************************************************
+Bootstrap CSS Redifinition
+********************************************************/
+.form-group .form-check label.form-check-label, 
+.form-group label.col-form-label {font-size:0.875rem;}
+table.table th {border-bottom:0px !important;background:#F0F0F0;text-align:center;font-weight:500;}
+.btn {font-weight:300;}
+.row.nomargin {margin-left:0px;margin-right:0px;}
+
+.page-link {color:#444;}
+
+
+/********************************************************
+Added CSS
+********************************************************/
+.nospacing {padding:0 !important;margin:0 !important;}
+
+/* row : remove padding */
+.row.nopadding {padding:0 !important;margin:0 !important;}
+.row.nopadding > [class*="col-"] {
+		padding-left: 0 !important;
+		padding-right: 0 !important;
+}
+.no-gutters.row,
+.no-gutters.container,
+.no-gutters.container-fluid{
+  margin-left: 0;
+  margin-right: 0;
+}
+.no-gutters>[class^="col-"]{
+  padding-left: 0;
+  padding-right: 0;
+}
+
+
+/********************************************************
+table : input form 
+********************************************************/
+/* table 형식의 테이블 디자인 */
+table.table-form {border-left:0px;border-right:0px;}
+table.table-form tr th,  
+table.table-form tr td {padding-left:7px !important; padding-right:7px !important; vertical-align: middle;font-weight:300 !important;}
+table.table-form tr th:first-child, 
+table.table-form tr td:first-child {border-left:0px;}
+table.table-form tr th:last-child, 
+table.table-form tr td:last-child {border-right:0px;}
+table.table-form tr th .form-check-inline,  
+table.table-form tr td .form-check-inline {margin-top:4px;margin-bottom:4px;}
+table.table-form tr:last-child {border-bottom:1px solid #DEE2E6;}
+
+/* div 형식의 테이블 디자인 */
+form.form-horizontal .form-inline {border-bottom:1px solid #ddd;padding-top:10px;padding-bottom:10px;}
+form.form-horizontal .form-inline.border-top-2 {border-top:2px solid #ddd;}
+form.form-horizontal .form-group {padding-left:0px;padding-right:0px;}
+/* form.form-horizontal label.col-form-label {background:#F0F0F0;} */
+form.form-horizontal .form-group label.col-form-label {}
+
+/* select.form-control {line-height: 28px !important;height:20px !important;border:1px solid red;} */
+/*
+form.form-horizontal label[class*="col-"],
+form.form-horizontal input[class*="col-"],
+form.form-horizontal textarea[class*="col-"],
+form.form-horizontal div[class*="col-"] {padding:7px !important;border-bottom:1px solid #ddd;}
+*/
+
+.border-color-1 {border-color:#000 !important;}
+.border-color-2 {border-color:#444!important;}
+.border-color-3 {border-color:#1F1F1F8 !important;}
+.border-color-4 {border-color:#aaa !important;}
+.border-color-5 {border-color:#dee2e6 !important;}
+
+
+
+/********************************************************
+for Test, for Debug
+********************************************************/
+.brdRed {border:1px solid red !important;}
+.brdGreen {border:1px solid green !important;}
+.brdBlue {border:1px solid blue !important;}
+.brdYellow {border:1px solid yellow !important;}
+.brdBlack {border:1px solid black !important;}
+
+.bgRed {background:red !important;}
+.bgGreen {background:green !important;}
+.bgBlue {background:blue !important;}
+.bgYellow {background:yellow !important;}
+.bgBlack {background:black !important;}
+
+
+/********************************************************
+:: 21.0 Redefinition OR Modification NOW-UI-Dashboard
+********************************************************/

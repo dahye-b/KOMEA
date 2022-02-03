@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.komea.bbs.service.impl.KomeaBoardMapper">
+
+	<select id="SelectKomeaMainList" parameterType="KomeabbsVO" resultType="KomeabbsVO">
+		<![CDATA[
+		 SELECT @rownum:=@rownum+1 as rnum,
+            idx, block, rlevel, boss, b_code,
+            u_id, u_pwd, u_name, u_ip, title, substr(REGEXP_REPLACE(contents, '<[^>]+>',''),1,200) as contents, 
+            DATE_FORMAT(indate, '%Y-%m-%d') as indate
+         FROM KomeaBoard, (select @rownum:=0) tmp
+         WHERE B_CODE = #{bCode}
+         ORDER BY NOTIC_ON DESC, BLOCK DESC, BOSS ASC
+         LIMIT 4
+         ]]>
+	</select>
+
+	<select id="SelectKomeaList" parameterType="KomeabbsVO" resultType="KomeabbsVO">
+			SELECT 
+				idx, block, rlevel, boss, b_code,
+				u_id, u_pwd, u_name, u_ip, title, contents,
+				txt_mode, opt_contents, url, status,
+				DATE_FORMAT(startdate, '%Y-%m-%d') as startdate,
+				DATE_FORMAT(enddate, '%Y-%m-%d') as enddate,
+				link_on, unity_on, notic_on, main_on, secret_on, emp_on, head, headline,
+				DATE_FORMAT(indate, '%Y-%m-%d') as indate,
+				reco_cnt, cnt
+			<if test="bCode == 'B002'">
+			,(select concat(f_path,f_snm) from FileMaster where gul_idx= a.idx and f_no = '1' and del_yn = 'N') fNm
+			</if>
+			FROM KomeaBoard a
+			WHERE B_CODE = #{bCode}
+			<if test="searchKeyword != null and searchKeyword != ''">
+				<choose>
+					<when test="searchCondition == 9">
+						AND (u_name like '%${searchKeyword}%') OR (title like '%${searchKeyword}%') OR (contents like '%${searchKeyword}%')
+					</when>
+					<when test="searchCondition == 0">
+						AND u_name LIKE '%${searchKeyword}%'
+					</when>
+					<when test="searchCondition == 1">
+						AND title LIKE '%${searchKeyword}%'
+					</when>					
+					<otherwise>
+						AND contents LIKE '%${searchKeyword}%'
+					</otherwise>
+				</choose>
+			</if>
+			ORDER BY NOTIC_ON DESC, BLOCK DESC, BOSS ASC
+			LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+
+	<select id="SelectKomeaListTotCnt" parameterType="KomeabbsVO" resultType="int">
+			SELECT COUNT(*) cnt
+			FROM KomeaBoard
+			WHERE B_CODE = #{bCode}
+			<if test="searchKeyword != null and searchKeyword != ''">
+				<choose>
+					<when test="searchCondition == 9">
+						AND (u_name like '%${searchKeyword}%') OR (title like '%${searchKeyword}%') OR (contents like '%${searchKeyword}%')
+					</when>
+					<when test="searchCondition == 0">
+						AND u_name LIKE '%${searchKeyword}%'
+					</when>
+					<when test="searchCondition == 1">
+						AND title LIKE '%${searchKeyword}%'
+					</when>					
+					<otherwise>
+						AND contents LIKE '%${searchKeyword}%'
+					</otherwise>
+				</choose>
+			</if>
+	</select>
+	
+	<select id="SelectKomeaView" parameterType="KomeabbsVO" resultType="KomeabbsVO">
+			SELECT 
+				idx, block, rlevel, boss, b_code,
+				u_id, u_pwd, u_name, u_ip, title, contents,
+				txt_mode, opt_contents, url, status,
+				DATE_FORMAT(startdate, '%Y-%m-%d') as startdate,
+				DATE_FORMAT(enddate, '%Y-%m-%d') as enddate,
+				link_on, unity_on, notic_on, main_on, secret_on, emp_on, head, headline,
+				DATE_FORMAT(indate, '%Y-%m-%d') as indate,
+				reco_cnt, cnt,
+                (select f_nm from FileMaster where gul_idx=#{idx} and f_no = 1 and del_yn = 'N') as fnm1,
+                (select f_nm from FileMaster where gul_idx=#{idx} and f_no = 2 and del_yn = 'N') as fnm2,
+                (select f_nm from FileMaster where gul_idx=#{idx} and f_no = 3 and del_yn = 'N') as fnm3,
+                (select f_nm from FileMaster where gul_idx=#{idx} and f_no = 4 and del_yn = 'N') as fnm4
+			FROM KomeaBoard
+			WHERE B_CODE = #{bCode}
+			  AND IDX = #{idx}
+			  AND BLOCK = #{block}
+			  AND RLEVEL = #{rlevel}
+			  AND BOSS = #{boss}
+	</select>
+	
+	<select id="SelectKomeaFileInfo" parameterType="KomeabbsVO" resultType="KomeabbsVO">
+			SELECT gul_idx as idx, f_nm, f_snm, f_no
+			FROM FileMaster
+			WHERE gul_idx = #{idx}
+			  AND f_no = #{fNo}
+			  AND del_yn = 'N'
+	</select>
+	
+	<update id="UpdateKomeaFileDownCnt" parameterType="KomeabbsVO">
+			UPDATE FileMaster 
+			SET f_down = f_down+1 
+			WHERE gul_idx = #{idx}
+			  AND f_no = #{fNo}
+			  AND del_yn = 'N'
+	</update>
+	
+	<select id="SelectKomeaFileList" parameterType="KomeabbsVO" resultType="KomeabbsVO">
+			SELECT tname, b_code, gul_idx, f_no, f_nm, f_snm, f_path, ROUND(f_size/1024,1) AS f_size, f_down
+			FROM FileMaster WHERE gul_idx = #{idx} AND del_yn = 'N' order by f_no asc 
+	</select>
+	
+	<select id="SelectKomeaPreNextList" parameterType="KomeabbsVO" resultType="KomeabbsVO">
+	<![CDATA[
+			SELECT '현재글' as gb, a.* FROM KomeaBoard a WHERE B_CODE = #{bCode} AND IDX = #{idx} AND BLOCK = #{block} AND RLEVEL = #{rlevel} AND BOSS = #{boss}
+			UNION ALL (
+			SELECT '이전글' as gb, b.* FROM KomeaBoard b WHERE B_CODE = #{bCode} AND idx < #{idx} AND BLOCK < #{block} AND RLEVEL = #{rlevel} AND BOSS = #{boss} ORDER BY idx DESC LIMIT 1)
+			UNION ALL (
+			SELECT '다음글' as gb, c.* FROM KomeaBoard c WHERE B_CODE = #{bCode} AND idx > #{idx} AND BLOCK > #{block} AND RLEVEL = #{rlevel} AND BOSS = #{boss} ORDER BY idx ASC LIMIT 1)
+			ORDER BY idx ASC
+	]]>
+	</select>
+	
+	<update id="UpdateKomeaBoardCnt" parameterType="KomeabbsVO">
+			UPDATE KomeaBoard 
+			SET cnt = cnt+1 
+			WHERE B_CODE = #{bCode}
+			  AND IDX = #{idx}
+			  AND BLOCK = #{block}
+			  AND RLEVEL = #{rlevel}
+			  AND BOSS = #{boss}
+	</update>
+	
+	<insert id="InsertKomeaBoard" parameterType="KomeabbsVO">
+	<!-- 
+			<selectKey resultType="int" keyProperty="idx" order="BEFORE">
+				select max(idx)+1 from KomeaBoard
+			</selectKey>
+	-->
+			INSERT INTO KomeaBoard ( idx, block, rlevel, boss, b_code, u_name, title, contents, notic_on, main_on, secret_on, link_on, indate ) 
+			VALUES ( 
+					(select max(idx)+1 from KomeaBoard a), 
+					(select max(idx)+1 from KomeaBoard b), #{rlevel}, #{boss}, #{bCode}, 
+					#{uName}, #{title}, #{contents}, #{noticOn}, #{mainOn}, #{secretOn}, #{linkOn}, sysdate())  
+			<selectKey resultType="int" keyProperty="idx" order="AFTER">
+			    select max(idx) FROM KomeaBoard
+			</selectKey>
+	</insert>
+	
+	<insert id="InsertKomeaUploadFile" parameterType="hashMap">
+			INSERT INTO FileMaster ( tname, b_code, gul_idx, f_no, f_nm, f_snm, f_path, f_size, f_indate ) 
+			VALUES ( #{tname}, #{bCode}, #{gulIdx}, (select ifnull(max(f_no),0)+1 from FileMaster a where gul_idx = #{gulIdx} and del_yn = 'N'), 
+			#{fNm}, #{fSnm}, #{fPath}, #{fSize}, sysdate()  )
+	</insert>
+	
+	<update id="UpdateKomeaBoard" parameterType="KomeabbsVO">
+			UPDATE KomeaBoard 
+			SET u_name = #{uName},
+				title = #{title}, 
+				contents = #{contents}, 
+				notic_on = #{noticOn}, 
+				main_on = #{mainOn}, 
+				secret_on = #{secretOn}, 
+				link_on = #{linkOn}
+			WHERE B_CODE = #{bCode}
+			  AND IDX = #{idx}
+			  AND BLOCK = #{block}
+			  AND RLEVEL = #{rlevel}
+			  AND BOSS = #{boss}
+	</update>
+	
+	<update id="UpdateKomeaDeleteFile" parameterType="KomeabbsVO">
+			UPDATE FileMaster 
+			SET del_yn = 'Y' 
+			WHERE gul_idx = #{idx}
+	</update>
+	
+	<update id="UpdateKomeaDeleteFileIdx" parameterType="KomeabbsVO">
+			UPDATE FileMaster 
+			SET del_yn = 'Y' 
+			WHERE gul_idx = #{idx}
+			  AND f_no = #{fNo}
+	</update>
+	
+	<delete id="DeleteKomeaBoard" parameterType="KomeabbsVO">
+			DELETE FROM KomeaBoard 
+			WHERE B_CODE = #{bCode}
+			  AND IDX = #{idx}
+			  AND BLOCK = #{block}
+			  AND RLEVEL = #{rlevel}
+			  AND BOSS = #{boss}
+	</delete>
+
+	<select id="SelectBbsList" parameterType="KomeabbsVO" resultType="KomeabbsVO">
+			SELECT 
+				idx, block, rlevel, boss, b_code,
+				u_id, u_pwd, u_name, u_ip, title, contents,
+				txt_mode, opt_contents, url, status,
+				DATE_FORMAT(startdate, '%Y-%m-%d') as startdate,
+				DATE_FORMAT(enddate, '%Y-%m-%d') as enddate,
+				link_on, unity_on, notic_on, main_on, secret_on, emp_on, head, headline,
+				DATE_FORMAT(indate, '%Y-%m-%d') as indate,
+				reco_cnt, cnt
+			FROM KomeaBoard
+			WHERE 1=1
+			<if test="bCode != null and bCode != ''">
+				AND B_CODE = #{bCode}
+			</if>
+			<if test="searchKeyword != null and searchKeyword != ''">
+				<choose>
+					<when test="searchCondition == 9">
+						AND (u_name like '%${searchKeyword}%') OR (title like '%${searchKeyword}%') OR (contents like '%${searchKeyword}%')
+					</when>
+					<when test="searchCondition == 0">
+						AND u_name LIKE '%${searchKeyword}%'
+					</when>
+					<when test="searchCondition == 1">
+						AND title LIKE '%${searchKeyword}%'
+					</when>					
+					<otherwise>
+						AND contents LIKE '%${searchKeyword}%'
+					</otherwise>
+				</choose>
+			</if>
+			ORDER BY NOTIC_ON DESC, BLOCK DESC, BOSS ASC
+			LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+
+	<select id="SelectBbsListTotCnt" parameterType="KomeabbsVO" resultType="int">
+			SELECT COUNT(*) cnt
+			FROM KomeaBoard
+			WHERE 1=1
+			<if test="bCode != null and bCode != ''">
+				AND B_CODE = #{bCode}
+			</if>
+			<if test="searchKeyword != null and searchKeyword != ''">
+				<choose>
+					<when test="searchCondition == 9">
+						AND (u_name like '%${searchKeyword}%') OR (title like '%${searchKeyword}%') OR (contents like '%${searchKeyword}%')
+					</when>
+					<when test="searchCondition == 0">
+						AND u_name LIKE '%${searchKeyword}%'
+					</when>
+					<when test="searchCondition == 1">
+						AND title LIKE '%${searchKeyword}%'
+					</when>					
+					<otherwise>
+						AND contents LIKE '%${searchKeyword}%'
+					</otherwise>
+				</choose>
+			</if>
+	</select>
+	
+	<select id="SelectBbsView" parameterType="KomeabbsVO" resultType="KomeabbsVO">
+			SELECT 
+				idx, block, rlevel, boss, b_code,
+				u_id, u_pwd, u_name, u_ip, title, contents,
+				txt_mode, opt_contents, url, status,
+				DATE_FORMAT(startdate, '%Y-%m-%d') as startdate,
+				DATE_FORMAT(enddate, '%Y-%m-%d') as enddate,
+				link_on, unity_on, notic_on, main_on, secret_on, emp_on, head, headline,
+				DATE_FORMAT(indate, '%Y-%m-%d') as indate,
+				reco_cnt, cnt,
+                (select f_nm from FileMaster where gul_idx=#{idx} and f_no = 1 and del_yn = 'N') as fnm1,
+                (select f_nm from FileMaster where gul_idx=#{idx} and f_no = 2 and del_yn = 'N') as fnm2,
+                (select f_nm from FileMaster where gul_idx=#{idx} and f_no = 3 and del_yn = 'N') as fnm3,
+                (select f_nm from FileMaster where gul_idx=#{idx} and f_no = 4 and del_yn = 'N') as fnm4
+			FROM KomeaBoard
+			WHERE B_CODE = #{bCode}
+			  AND IDX = #{idx}
+			  AND BLOCK = #{block}
+			  AND RLEVEL = #{rlevel}
+			  AND BOSS = #{boss}
+	</select>
+	
+
+
+	<insert id="InsertQnaBoard" parameterType="KomeabbsVO">
+		<selectKey resultType="int" keyProperty="idx" order="BEFORE">
+			select ifnull(max(idx)+1,1) from QnaBoard
+		</selectKey>
+		INSERT INTO QnaBoard ( idx, gul_idx, srsn, name, title, contents, email, tel, password, insert_dt) 
+		VALUES ( #{idx}, #{idx}, 0, #{name}, #{title}, #{contents}, #{email}, #{tel}, #{password}, NOW() )
+	</insert>
+
+	<insert id="InsertQnaReplyBoard" parameterType="KomeabbsVO">
+		<selectKey resultType="int" keyProperty="idx" order="BEFORE">
+			select ifnull(max(idx)+1,1) from QnaBoard
+		</selectKey>
+		INSERT INTO QnaBoard ( idx, gul_idx, srsn, name, title, contents, reply_yn, password, insert_dt ) 
+		VALUES ( #{idx}, #{gulIdx}, 
+				(select ifnull(max(srsn)+1,1) from QnaBoard a where IDX = #{idx} AND GUL_IDX = #{gulIdx}), 
+				#{name}, #{title}, #{contents}, 'Y', #{password}, NOW() )
+	</insert>
+
+	<select id="SelectQnaList" parameterType="KomeabbsVO" resultType="KomeabbsVO">
+		SELECT idx, gul_idx, srsn, NAME, title, contents, email, tel, password, reply_yn, del_yn, DATE_FORMAT(insert_dt, '%Y-%m-%d') as insert_dt
+		FROM QnaBoard
+		WHERE del_yn = 'N'
+		<if test="searchKeyword != null and searchKeyword != ''">
+			<choose>
+				<when test="searchCondition == 9">
+					AND (name like '%${searchKeyword}%') OR (title like '%${searchKeyword}%') OR (contents like '%${searchKeyword}%')
+				</when>
+				<when test="searchCondition == 0">
+					AND name LIKE '%${searchKeyword}%'
+				</when>
+				<when test="searchCondition == 1">
+					AND title LIKE '%${searchKeyword}%'
+				</when>					
+				<otherwise>
+					AND contents LIKE '%${searchKeyword}%'
+				</otherwise>
+			</choose>
+		</if>
+		ORDER BY IDX, SRSN
+		LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+
+	<select id="SelectQnaListTotCnt" parameterType="KomeabbsVO" resultType="int">
+		SELECT count(*) cnt
+		FROM QnaBoard
+		WHERE del_yn = 'N'
+		<if test="searchKeyword != null and searchKeyword != ''">
+			<choose>
+				<when test="searchCondition == 9">
+					AND (name like '%${searchKeyword}%') OR (title like '%${searchKeyword}%') OR (contents like '%${searchKeyword}%')
+				</when>
+				<when test="searchCondition == 0">
+					AND name LIKE '%${searchKeyword}%'
+				</when>
+				<when test="searchCondition == 1">
+					AND title LIKE '%${searchKeyword}%'
+				</when>					
+				<otherwise>
+					AND contents LIKE '%${searchKeyword}%'
+				</otherwise>
+			</choose>
+		</if>
+	</select>
+
+	<select id="SelectQnaView" parameterType="KomeabbsVO" resultType="KomeabbsVO">
+		SELECT idx, gul_idx, srsn, NAME, title, contents, email, tel, password, reply_yn, del_yn, DATE_FORMAT(insert_dt, '%Y-%m-%d') as insert_dt
+		FROM QnaBoard
+		WHERE DEL_YN = 'N'
+		  AND IDX = #{idx}
+		  AND GUL_IDX = #{gulIdx}
+		  AND SRSN = #{srsn}
+	</select>
+
+	<update id="UpdateQnaBoard" parameterType="KomeabbsVO">
+		UPDATE QnaBoard 
+		SET NAME = #{name}, TITLE = #{title}, CONTENTS = #{contents}, EMAIL = #{email}, TEL = #{tel}, UPDATE_DT = NOW()
+		WHERE IDX = #{idx}
+		  AND GUL_IDX = #{gulIdx}
+		  AND SRSN = #{srsn}
+	</update>
+	
+	<update id="DeleteQnaBoard" parameterType="KomeabbsVO">
+		UPDATE QnaBoard 
+		SET DEL_YN = 'Y'
+		WHERE IDX = #{idx}
+		  AND GUL_IDX = #{gulIdx}
+		  AND SRSN = #{srsn}
+	</update>
+	
+	<select id="SelectQnaReplyTotCnt" parameterType="KomeabbsVO" resultType="int">
+		SELECT COUNT(*) CNT FROM QnaBoard WHERE GUL_IDX = #{gulIdx} AND REPLY_YN = 'Y'
+	</select>
+	
+	<select id="SelectLogTotCnt" parameterType="KomeabbsVO" resultType="int">
+		SELECT COUNT(*) cnt FROM KOMEA_LOG
+		WHERE DAY = DATE_FORMAT(NOW(), '%Y-%m-%d')
+	</select>
+	
+	<select id="SelectVisitTotCnt" parameterType="KomeabbsVO" resultType="int">
+		SELECT CNT FROM KOMEA_LOG
+		WHERE DAY = DATE_FORMAT(NOW(), '%Y-%m-%d')
+	</select>
+	
+	<insert id="InsertLogCnt" parameterType="KomeabbsVO">
+		INSERT INTO KOMEA_LOG (DAY, CNT)
+		VALUES(DATE_FORMAT(NOW(), '%Y-%m-%d'), 1)
+	</insert>
+	
+	<update id="UpdateLogCnt" parameterType="KomeabbsVO">
+		UPDATE KOMEA_LOG
+		SET CNT = CNT+1
+		WHERE DAY = DATE_FORMAT(NOW(), '%Y-%m-%d')
+	</update>
+
+</mapper>

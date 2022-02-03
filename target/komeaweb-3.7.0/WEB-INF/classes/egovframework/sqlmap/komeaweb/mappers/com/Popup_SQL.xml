@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.komeaweb.com.service.impl.PopupMapper">
+
+	<select id="SelectPopupList" parameterType="popupVO" resultType="popupVO">
+			SELECT POPUP_NO, SUBJECT, START_DT, END_DT, WIDTH, HEIGHT, CONTENTS, DESCRIPTION, 
+					OPEN_YN, DELETE_YN, INSERT_USER_DT, INSERT_USER_ID, UPDATE_USER_DT, UPDATE_USER_ID 
+			FROM POPUP_INFO
+			WHERE 1=1
+			<if test="searchKeyword != null">
+				<choose>
+					<when test="searchCondition == 0">
+						AND SUBJECT like '%${searchKeyword}%'
+					</when>
+					<when test="searchCondition == 1">
+						AND CONTENTS LIKE '%${searchKeyword}%'
+					</when>					
+					<otherwise>
+					</otherwise>
+				</choose>
+			</if>
+			LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+
+	<select id="SelectPopupListTotCnt" parameterType="popupVO" resultType="int">
+			SELECT COUNT(*) cnt
+			FROM POPUP_INFO
+			WHERE 1=1
+			<if test="searchKeyword != null">
+				<choose>
+					<when test="searchCondition == 0">
+						AND SUBJECT like '%${searchKeyword}%'
+					</when>
+					<when test="searchCondition == 1">
+						AND CONTENTS LIKE '%${searchKeyword}%'
+					</when>					
+					<otherwise>
+					</otherwise>
+				</choose>
+			</if>
+	</select>
+	
+	<select id="SelectPopupView" parameterType="popupVO" resultType="popupVO">
+		SELECT POPUP_NO, SUBJECT, START_DT, END_DT, WIDTH, HEIGHT, CONTENTS, DESCRIPTION, 
+					OPEN_YN, DELETE_YN, INSERT_USER_DT, INSERT_USER_ID, UPDATE_USER_DT, UPDATE_USER_ID
+		  FROM POPUP_INFO
+		 WHERE POPUP_NO = #{popupNo}
+	</select>
+	
+	<insert id="InsertPopup" parameterType="popupVO">
+			<selectKey resultType="int" keyProperty="popupNo" order="BEFORE">
+				SELECT MAX(POPUP_NO)+1 FROM POPUP_INFO
+			</selectKey>
+			INSERT INTO POPUP_INFO (POPUP_NO, SUBJECT, START_DT, END_DT, WIDTH, HEIGHT, CONTENTS, DESCRIPTION, 
+					OPEN_YN, DELETE_YN, INSERT_USER_DT, INSERT_USER_ID, UPDATE_USER_DT, UPDATE_USER_ID)
+			VALUES (
+			  #{popupNo}, #{subject}, #{startDt}, #{endDt}, #{width}, #{height},
+			  #{contents}, #{description}, #{openYn}, 'N', now(), #{insertUserId}, NOW(), #{insertUserId}
+			  )
+	</insert>
+	
+	<update id="UpdatePopup" parameterType="popupVO">
+			UPDATE POPUP_INFO 
+			SET SUBJECT = #{subject},
+				START_DT = #{startDt},
+				END_DT = #{endDt}, 
+				WIDTH = #{width}, 
+				HEIGHT = #{height}, 
+				CONTENTS = #{contents}, 
+				DESCRIPTION = #{description},
+				OPEN_YN = #{openYn},
+				UPDATE_USER_DT = NOW(),
+				UPDATE_USER_ID = #{updateUserId}
+			WHERE POPUP_NO = #{popupNo}
+	</update>
+	
+	<update id="DeletePopup" parameterType="popupVO">
+			UPDATE POPUP_INFO 
+			SET DELETE_YN = 'Y', OPEN_YN = 'N'
+			WHERE POPUP_NO = #{popupNo}
+	</update>
+	
+	<select id="SelectMainPopupList" parameterType="popupVO" resultType="popupVO">
+		SELECT * FROM POPUP_INFO
+		WHERE  OPEN_YN = 'Y'
+		AND NOW() BETWEEN START_DT AND END_DT
+	</select>
+
+</mapper>

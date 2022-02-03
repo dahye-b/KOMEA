@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.komea.comp.service.impl.KomeaCompMapper">
+
+	<select id="SelectCompList" parameterType="KomeaCompVO" resultType="KomeaCompVO">
+			SELECT 
+				idx, m_id, company, e_company, ceo, e_ceo, zipcode, ifnull(CONCAT('http://' ,REPLACE(homepage, 'http://', '')),'') AS homepage, head, tel, fax, email, 
+				main_products, contents, certificate, 
+				DATE_FORMAT(w_date, '%Y-%m-%d') as wDate,
+				DATE_FORMAT(r_date, '%Y-%m-%d') as rDate, use_del, 
+				(CASE area
+					WHEN 'SU' THEN '서울'
+					WHEN 'SJ' THEN '세종'
+					WHEN 'IN' THEN '인천'
+					WHEN 'GN' THEN '경기도'
+					WHEN 'GG' THEN '강원도'
+					WHEN 'CB' THEN '층청북도'
+					WHEN 'CN' THEN '충청남도'
+					WHEN 'GW' THEN '대전'
+					WHEN 'DE' THEN '대구'
+					WHEN 'JB' THEN '전라북도'
+					WHEN 'JN' THEN '전라남도'
+					WHEN 'GZ' THEN '광주'
+					WHEN 'KP' THEN '경상북도'
+					WHEN 'KN' THEN '경상남도'
+					WHEN 'BS' THEN '부산'
+					WHEN 'JJ' THEN '제주도'
+					WHEN 'US' THEN '울산' ELSE '-' END ) as area, category, e_head, id
+			FROM TB_Combination
+			WHERE use_del= '0'
+			<if test="category != null and category != ''">
+				AND category = #{category}
+			</if>
+			<if test="area != null and area != ''">
+				AND area = #{area}
+			</if>
+			<if test="company != null and company != ''">
+				AND company LIKE '%${company}%'
+			</if>
+			ORDER BY company ASC
+			LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+
+	<select id="SelectCompListTotCnt" parameterType="KomeaCompVO" resultType="int">
+			SELECT COUNT(*) cnt
+			FROM TB_Combination
+			WHERE use_del= '0'
+			<if test="category != null and category != ''">
+				AND category = #{category}
+			</if>
+			<if test="area != null and area != ''">
+				AND area = #{area}
+			</if>
+			<if test="company != null and company != ''">
+				AND company LIKE '%${company}%'
+			</if>
+	</select>
+	
+	<select id="SelectCompView" parameterType="KomeaCompVO" resultType="KomeaCompVO">
+		<![CDATA[
+			SELECT 
+				idx, m_id, company, e_company, ceo, e_ceo, zipcode, homepage, head, tel, fax, email, 
+				main_products, contents, certificate, 
+				DATE_FORMAT(w_date, '%Y-%m-%d') as wDate,
+				DATE_FORMAT(r_date, '%Y-%m-%d') as rDate, use_del, 
+				(CASE area
+					WHEN 'SU' THEN '서울'
+					WHEN 'SJ' THEN '세종'
+					WHEN 'IN' THEN '인천'
+					WHEN 'GN' THEN '경기도'
+					WHEN 'GG' THEN '강원도'
+					WHEN 'CB' THEN '층청북도'
+					WHEN 'CN' THEN '충청남도'
+					WHEN 'GW' THEN '대전'
+					WHEN 'DE' THEN '대구'
+					WHEN 'JB' THEN '전라북도'
+					WHEN 'JN' THEN '전라남도'
+					WHEN 'GZ' THEN '광주'
+					WHEN 'KP' THEN '경상북도'
+					WHEN 'KN' THEN '경상남도'
+					WHEN 'BS' THEN '부산'
+					WHEN 'JJ' THEN '제주도'
+					WHEN 'US' THEN '울산' ELSE '-' END ) as area, 
+				(CASE category
+					WHEN 'Hul' THEN 'Hull & ship General'
+					WHEN 'Out' THEN 'Outfitting'
+					WHEN 'Eng' THEN 'Engine & Machinery'
+					WHEN 'Ele' THEN 'Electric & Electronics' END ) as category, e_head
+			FROM TB_Combination
+			WHERE use_del= '0'
+			  AND IDX = #{idx}
+		]]>
+	</select>
+	
+	<insert id="InsertComp" parameterType="KomeaCompVO">
+			INSERT INTO TB_Combination (IDX, COMPANY, CEO, TEL, AREA) 
+			VALUES ( (select max(idx)+1 from TB_Combination a), #{company}, #{ceo}, #{tel}, #{area} )
+	</insert>
+	
+	<update id="DeleteComp" parameterType="KomeaCompVO">
+			UPDATE TB_Combination 
+			SET use_del = '1' 
+			WHERE IDX = #{idx}
+	</update>
+	
+	<insert id="InsertMberComp" parameterType="KomeaCompVO">
+		INSERT INTO TB_Combination (IDX, COMPANY, CEO, TEL, HOMEPAGE, ID) 
+		VALUES ( (select max(idx)+1 from TB_Combination a), #{company}, #{ceo}, #{tel}, #{homepage}, #{id} )
+	</insert>
+	
+	<update id="DeleteCompId" parameterType="KomeaCompVO">
+			UPDATE TB_Combination 
+			SET use_del = '1' 
+			WHERE ID = #{id}
+	</update>
+	
+	<update id="UpdateCompArea" parameterType="KomeaCompVO">
+			UPDATE TB_Combination 
+			SET area = #{area}
+			WHERE ID = #{id}
+	</update>
+	
+	<insert id="InsertCompExcelList" parameterType="hashMap">
+		INSERT INTO TB_Combination (IDX, COMPANY, CEO, HOMEPAGE, TEL, ID, AREA) 
+		VALUES ( #{idx}, #{company}, #{ceo}, #{homepage}, #{tel}, #{ID}, #{area})
+	</insert>
+	
+	<delete id="DeleteCompAll" parameterType="KomeaCompVO">
+		DELETE FROM TB_Combination 
+	</delete>
+</mapper>

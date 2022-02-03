@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.komeaweb.com.service.impl.MberMapper">
+
+	<select id="SelectMber" parameterType="mberVO" resultType="mberVO">
+			SELECT * 
+			FROM MBER_INFO 
+			WHERE ID = #{id}
+	</select>
+	
+	<!-- 로그인시 포인트 업데이트 -->
+	<update id="UpdateLevel" parameterType="mberVO">
+			UPDATE MBER_INFO E 
+	          JOIN ( SELECT ENTRPRS_MBER_CD, IFNULL(SUM(SCORE), 0 ) SCORE ,
+				CASE WHEN IFNULL(SUM(SCORE), 0 ) > (SELECT NUM_REF1 FROM CODEBOOK WHERE CD_DEC = 'COMP_LEVEL' AND CD_ITEM = '1' ) THEN '2' ELSE '1' END COMP_LEVEL
+		         FROM (SELECT ENTRPRS_MBER_CD, (COUNT(*) * 5 ) AS SCORE FROM EXBI_REQST_INFO GROUP BY ENTRPRS_MBER_CD
+	           UNION ALL  
+		         SELECT ENTRPRS_MBER_CD, (COUNT(*) * 3) AS SCORE FROM CNSLTEXHB_REQST_INFO GROUP BY ENTRPRS_MBER_CD
+	           UNION ALL 
+		         SELECT AA.ENTRPRS_MBER_CD, (SUM(AA.CNT) * 2) AS SCORE FROM (SELECT DISTINCT CNSLTEXHB_CD, ENTRPRS_MBER_CD, 1 AS CNT FROM CNSLTEXHB_RSLT_INFO
+	                 WHERE CNTRCT_PRTN_BEFORE_AMT IS NOT NULL ) AA
+		         GROUP BY AA.ENTRPRS_MBER_CD
+	           UNION ALL 
+		         SELECT AA.ENTRPRS_MBER_CD, (SUM(AA.CNT) * 5) AS SCORE FROM(SELECT DISTINCT CNSLTEXHB_CD, ENTRPRS_MBER_CD, 1 AS CNT FROM CNSLTEXHB_RSLT_INFO
+	                 WHERE CNTRCT_PRTN_AFTER_AMT IS NOT NULL ) AA
+		         GROUP BY AA.ENTRPRS_MBER_CD
+	           UNION ALL
+		         SELECT MBER_CD AS ENTRPRS_MBER_CD, CASE WHEN UNION_COMP_YN = 'Y' THEN 5 ELSE 0 END AS SCORE FROM MBER_INFO WHERE SSBYP = '2') D
+		         GROUP BY D.ENTRPRS_MBER_CD ) F
+	          ON   E.MBER_CD =  F.ENTRPRS_MBER_CD 
+	      SET     
+	      E.SCORE = F.COMP_LEVEL,
+	      E.SCORE = F.SCORE
+	      WHERE E.MBER_CD = #{mberCd}
+	</update>
+
+	<select id="SelectMberList" parameterType="mberVO" resultType="mberVO">
+			SELECT 
+				MBER_CD, SSBYP, 
+				CASE WHEN SSBYP = 1 THEN '기관' WHEN SSBYP = 2 THEN '기업' ELSE '기타' END AS ssbypNm, 
+				ID, RPRSNTV, TELNO, FAX, REPRSNT_EMAIL, CHARGER_NM, CHARGER_DEPT, CHARGER_OFCPS,
+				CHARGER_TLPHON, CHARGER_EMAIL, SBSCRB_CONFM_YN,
+				CASE WHEN SSBYP=1 THEN INSTT_NM ELSE CMPNY_NM END cmpnyNm,
+				COMP_LEVEL,
+				CONCAT(C.CD_KOR,' (',CAST(A.SCORE AS CHAR),')') AS compLevelNm, 
+				IfNULL(UNION_COMP_YN, 'N') AS unionCompYn 
+			FROM MBER_INFO A 
+			LEFT JOIN CODEBOOK C 
+				ON A.COMP_LEVEL = C.CD_ITEM 
+				AND C.CD_DEC = 'COMP_LEVEL' 
+			WHERE MBER_CD != '1201405001'
+			<if test="searchKeyword != null">
+				<choose>
+					<when test="searchCondition == 0">
+						AND ID like '%${searchKeyword}%'
+					</when>
+					<when test="searchCondition == 1">
+						AND (INSTT_NM like '%${searchKeyword}%') OR (CMPNY_NM like '%${searchKeyword}%')
+					</when>
+					<when test="searchCondition == 2">
+						AND RPRSNTV LIKE '%${searchKeyword}%'
+					</when>					
+					<otherwise>
+					</otherwise>
+				</choose>
+			</if>
+			LIMIT #{firstIndex}, #{recordCountPerPage}
+	</select>
+
+	<select id="SelectMberListTotCnt" parameterType="mberVO" resultType="int">
+			SELECT COUNT(*) cnt
+			FROM MBER_INFO A 
+			LEFT JOIN CODEBOOK C 
+				ON A.COMP_LEVEL = C.CD_ITEM 
+				AND C.CD_DEC = 'COMP_LEVEL' 
+			WHERE MBER_CD != '1201405001'
+			<if test="searchKeyword != null">
+				<choose>
+					<when test="searchCondition == 0">
+						AND ID like '%${searchKeyword}%'
+					</when>
+					<when test="searchCondition == 1">
+						AND (INSTT_NM like '%${searchKeyword}%') OR (CMPNY_NM like '%${searchKeyword}%')
+					</when>
+					<when test="searchCondition == 2">
+						AND RPRSNTV LIKE '%${searchKeyword}%'
+					</when>					
+					<otherwise>
+					</otherwise>
+				</choose>
+			</if>
+	</select>
+	
+	<select id="userIdCheck" parameterType="mberVO" resultType="int">
+			SELECT COUNT(*) cnt
+			FROM MBER_INFO 
+			WHERE ID = #{id}
+	</select>
+	
+	<select id="SelectMberView" parameterType="mberVO" resultType="mberVO">
+		SELECT MBER_CD, SSBYP
+		     , (SELECT CD_KOR FROM CODEBOOK WHERE CD_DEC = 'SSBYP' AND CD_ITEM = TBL.SSBYP) AS ssbypNm
+		     , ID
+		     , RPRSNTV
+		     , RPRSNTV_ENG
+		     , TELNO
+		     , FAX
+		     , REPRSNT_EMAIL
+		     , CHARGER_NM
+		     , CHARGER_NM_ENG
+		     , CHARGER_DEPT
+		     , CHARGER_DEPT_ENG
+		     , CHARGER_OFCPS
+		     , CHARGER_OFCPS_ENG
+		     , CHARGER_TLPHON
+		     , CHARGER_EMAIL
+		     , SBSCRB_CONFM_YN
+		     , FILE_NM
+		     , FILE_COURS
+		     , CMPNY_NM
+		     , CMPNY_NM_ENG
+		     , LOCPLC
+		     , LOCPLC_ENG
+		     , FOND_DE
+		     , EMPLY_CO
+		     , BEFORE_YEAR_SALAMT
+		     , BEFORE_YEAR_XPORT_ACMSLT
+		     , HMPG
+		     , MFCRTR_YN
+		     , SMLPZ_YN
+		     , MAIN_PRDUCT
+		     , MAIN_PRDUCT_ENG
+		     , PATENT_CRTFC
+		     , PATENT_CRTFC_ENG
+		     , MAIN_BCNC
+		     , MAIN_BCNC_ENG
+		     , INSTT_NM
+		     , INSTT_NM_ENG
+		     , MAIN_SKLL
+		     , MAIN_SKLL_ENG
+		     , ETC_MATTER
+		     , INSERT_USER_ID
+		     , UPDATE_USER_DT
+		     , UPDATE_USER_ID
+		     , INSERT_USER_DT
+		     , POST_CODE1
+		     , POST_CODE2
+		     , FILE_NM2
+		     , FILE_COURS2
+		     , ADD_PRDUCT
+		     , ADD_PRDUCT_ENG
+		     , BIZ_NUM
+		     , COMP_LEVEL
+		     , CASE WHEN COMP_LEVEL=2 AND SSBYP = 2 THEN '프리미엄' 
+			           WHEN COMP_LEVEL=1 AND SSBYP = 2 THEN '일반' 
+		                ELSE '-' 
+		         END COMP_LEVEL_NM
+		     , IfNULL(UNION_COMP_YN, 'N') AS UNION_COMP_YN
+		     , FILE_NM2
+		     , FILE_COURS2
+		     , SSBYP_GB
+		  FROM MBER_INFO TBL
+		 WHERE MBER_CD = #{mberCd}
+	</select>
+	
+	<select id="SelectMberPointView" parameterType="mberVO" resultType="mberVO">
+			SELECT * 
+			FROM MBER_INFO 
+	</select>
+	
+	<update id="UpdateMberConfm" parameterType="mberVO">
+			UPDATE MBER_INFO 
+			SET SBSCRB_CONFM_YN = #{sbscrbConfmYn}
+			WHERE MBER_CD = #{mberCd}
+	</update>
+	
+	<update id="UpdateUnionCompYn" parameterType="mberVO">
+			UPDATE MBER_INFO 
+			SET UNION_COMP_YN = #{unionCompYn}
+			WHERE MBER_CD = #{mberCd}
+	</update>
+	
+	<select id="SelectMberFileInfo" parameterType="mberVO" resultType="mberVO">
+			SELECT gul_idx as idx, f_nm, f_snm, f_no
+			FROM FileMaster
+			WHERE gul_idx = #{idx}
+			  AND f_no = #{fNo}
+			  AND del_yn = 'N'
+	</select>
+	
+	<update id="UpdateMberFileDownCnt" parameterType="mberVO">
+			UPDATE FileMaster 
+			SET f_down = f_down+1 
+			WHERE gul_idx = #{idx}
+			  AND f_no = #{fNo}
+			  AND del_yn = 'N'
+	</update>
+	
+	<select id="SelectMberFileList" parameterType="mberVO" resultType="mberVO">
+			SELECT tname, b_code, gul_idx, f_no, f_nm, f_snm, f_path, ROUND(f_size/1024,1) AS f_size, f_down
+			FROM FileMaster WHERE gul_idx = #{idx} AND del_yn = 'N' order by f_no asc 
+	</select>
+	
+	<update id="UpdateMberCnt" parameterType="mberVO">
+			UPDATE KomeaBoard 
+			SET cnt = cnt+1 
+			WHERE B_CODE = #{bCode}
+			  AND IDX = #{idx}
+			  AND BLOCK = #{block}
+			  AND RLEVEL = #{rlevel}
+			  AND BOSS = #{boss}
+	</update>
+	
+	<select id="checkEmptyId" parameterType="mberVO" resultType="mberVO">
+		SELECT
+		    COUNT(ID)
+		FROM
+		    MBER_INFO
+		WHERE
+		    ID = #{id}
+	</select>	
+
+	<insert id="InsertMber" parameterType="mberVO">
+			<selectKey resultType="String" keyProperty="mberCd" order="BEFORE">
+				SELECT CAST(IFNULL(MAX(MBER_CD),CONCAT('1',CAST(CONCAT(DATE_FORMAT(NOW(), "%Y%m"),'000') AS UNSIGNED ))) +1 AS CHAR)  AS MBER_CD
+                FROM MBER_INFO
+            	WHERE MBER_CD LIKE CONCAT('1',CAST(DATE_FORMAT(NOW(), "%Y%m") as CHAR),'%')
+			</selectKey>
+			INSERT INTO MBER_INFO (MBER_CD, SSBYP, ID, PASSWORD, BEFORE_PASSWORD, RPRSNTV,
+			  RPRSNTV_ENG, TELNO, FAX, REPRSNT_EMAIL, CHARGER_NM, CHARGER_NM_ENG, CHARGER_DEPT,
+			  CHARGER_DEPT_ENG, CHARGER_OFCPS, CHARGER_OFCPS_ENG, CHARGER_TLPHON, CHARGER_EMAIL,
+			  SBSCRB_CONFM_YN, FILE_NM, FILE_COURS, CMPNY_NM, CMPNY_NM_ENG, LOCPLC, LOCPLC_ENG, FOND_DE,
+			  EMPLY_CO, BEFORE_YEAR_SALAMT, BEFORE_YEAR_XPORT_ACMSLT, HMPG, MFCRTR_YN, SMLPZ_YN,
+			  MAIN_PRDUCT, MAIN_PRDUCT_ENG, PATENT_CRTFC, PATENT_CRTFC_ENG, MAIN_BCNC, MAIN_BCNC_ENG,
+			  INSTT_NM, INSTT_NM_ENG, MAIN_SKLL, MAIN_SKLL_ENG, ETC_MATTER, INSERT_USER_ID, UPDATE_USER_DT,
+			  UPDATE_USER_ID, INSERT_USER_DT, SSBYP_GB)
+			VALUES (
+			  #{mberCd}, #{ssbyp}, #{id}, #{password}, #{password}, #{rprsntv},
+			  #{rprsntvEng}, #{telno}, #{fax}, #{reprsntEmail}, #{chargerNm}, #{chargerNmEng}, #{chargerDept},
+			  #{chargerDeptEng}, #{chargerOfcps}, #{chargerOfcpsEng}, #{chargerTlphon}, #{chargerEmail},
+			  'N', #{fileNm}, #{fileCours}, #{cmpnyNm}, #{cmpnyNmEng}, #{locplc}, #{locplcEng}, #{fondDe},
+			  #{emplyCo}, #{beforeYearSalamt}, #{beforeYearXportAcmslt}, #{hmpg}, #{mfcrtrYn}, #{smlpzYn},
+			  #{mainPrduct}, #{mainPrductEng}, #{patentCrtfc}, #{patentCrtfcEng}, #{mainBcnc}, #{mainBcncEng},
+			  #{insttNm}, #{insttNmEng}, #{mainSkll}, #{mainSkllEng}, #{etcMatter}, #{insertUserId}, NOW(),
+			  #{insertUserId}, NOW(), #{ssbypGb}
+			  )
+	</insert>
+	
+	<update id="UpdateMberUploadFile" parameterType="hashMap">
+			UPDATE MBER_INFO 
+			SET ${col_1} = #{fileNm},
+				${col_2} = #{fileCours}
+			WHERE MBER_CD = #{mberCd}
+	</update>
+
+	<update id="DeleteMberUploadFile" parameterType="mberVO">
+		UPDATE MBER_INFO 
+	    SET ${tmp1} = NULL, ${tmp2} = NULL
+		WHERE MBER_CD = #{mberCd}
+	</update>
+	
+	<insert id="InsertMberUploadFile" parameterType="hashMap">
+			INSERT INTO FileMaster ( tname, b_code, gul_idx, f_no, f_nm, f_snm, f_path, f_size, f_indate ) 
+			VALUES ( #{tname}, #{bCode}, #{gulIdx}, #{fNo}, #{fNm}, #{fSnm}, #{fPath}, #{fSize}, sysdate()  )
+	</insert>
+	
+	<update id="UpdateMber" parameterType="mberVO">
+		UPDATE MBER_INFO 
+			<set>
+				<if test="ssbyp != null">SSBYP = #{ssbyp},</if>
+				<if test="password != null">PASSWORD = #{password},</if>
+				<if test="beforePassword != null">BEFORE_PASSWORD = #{beforePassword},</if>
+				<if test="rprsntv != null">RPRSNTV = #{rprsntv},</if>
+				<if test="rprsntvEng != null">RPRSNTV_ENG = #{rprsntvEng},</if>
+				<if test="telno != null">TELNO = #{telno},</if>
+				<if test="fax != null">FAX = #{fax},</if>
+				<if test="reprsntEmail != null">REPRSNT_EMAIL = #{reprsntEmail},</if>
+				<if test="chargerNm != null">CHARGER_NM = #{chargerNm},</if>
+				<if test="chargerNmEng != null">CHARGER_NM_ENG = #{chargerNmEng},</if>
+				<if test="chargerDept != null">CHARGER_DEPT = #{chargerDept},</if>
+				<if test="chargerDeptEng != null">CHARGER_DEPT_ENG = #{chargerDeptEng},</if>
+				<if test="chargerOfcps != null">CHARGER_OFCPS = #{chargerOfcps},</if>
+				<if test="chargerOfcpsEng != null">CHARGER_OFCPS_ENG = #{chargerOfcpsEng},</if>
+				<if test="chargerTlphon != null">CHARGER_TLPHON = #{chargerTlphon},</if>
+				<if test="chargerEmail != null">CHARGER_EMAIL = #{chargerEmail},</if>
+				<if test="sbscrbConfmYn != null">SBSCRB_CONFM_YN = #{sbscrbConfmYn},</if>
+				<if test="fileNm != null">FILE_NM = #{fileNm},</if>
+				<if test="fileCours != null">FILE_COURS = #{fileCours},</if>
+				<if test="cmpnyNm != null">CMPNY_NM = #{cmpnyNm},</if>
+				<if test="cmpnyNmEng != null">CMPNY_NM_ENG = #{cmpnyNmEng},</if>
+				<if test="locplc != null">LOCPLC = #{locplc},</if>
+				<if test="locplcEng != null">LOCPLC_ENG = #{locplcEng},</if>
+				<if test="fondDe != null">FOND_DE = #{fondDe},</if>
+				<if test="emplyCo != null">EMPLY_CO = #{emplyCo},</if>
+				<if test="beforeYearSalamt != null">BEFORE_YEAR_SALAMT = #{beforeYearSalamt},</if>
+				<if test="beforeYearXportAcmslt != null">BEFORE_YEAR_XPORT_ACMSLT = #{beforeYearXportAcmslt},</if>
+				<if test="hmpg != null">HMPG = #{hmpg},</if>
+				<if test="mfcrtrYn != null">MFCRTR_YN = #{mfcrtrYn},</if>
+				<if test="smlpzYn != null">SMLPZ_YN = #{smlpzYn},</if>
+				<if test="mainPrduct != null">MAIN_PRDUCT = #{mainPrduct},</if>
+				<if test="mainPrductEng != null">MAIN_PRDUCT_ENG = #{mainPrductEng},</if>
+				<if test="patentCrtfc != null">PATENT_CRTFC = #{patentCrtfc},</if>
+				<if test="patentCrtfcEng != null">PATENT_CRTFC_ENG = #{patentCrtfcEng},</if>
+				<if test="mainBcnc != null">MAIN_BCNC = #{mainBcnc},</if>
+				<if test="mainBcncEng != null">MAIN_BCNC_ENG = #{mainBcncEng},</if>
+				<if test="insttNm != null">INSTT_NM = #{insttNm},</if>
+				<if test="insttNmEng != null">INSTT_NM_ENG = #{insttNmEng},</if>
+				<if test="mainSkll != null">MAIN_SKLL = #{mainSkll},</if>
+				<if test="mainSkllEng != null">MAIN_SKLL_ENG = #{mainSkllEng},</if>
+				<if test="etcMatter != null">ETC_MATTER = #{etcMatter},</if>
+				<if test="updateUserId != null">UPDATE_USER_ID=#{updateUserId},</if>
+				<if test="updateUserId != null">UPDATE_USER_DT=NOW()</if>
+			</set>
+		WHERE MBER_CD = #{mberCd}
+	</update>
+	
+	<update id="UpdateMberDeleteFile" parameterType="mberVO">
+			UPDATE FileMaster 
+			SET del_yn = 'Y' 
+			WHERE gul_idx = #{idx}
+	</update>
+	
+	<delete id="DeleteMber" parameterType="mberVO">
+			DELETE FROM MBER_INFO 
+			WHERE MBER_CD = #{mberCd}
+	</delete>
+
+	<update id="updateMemberPass" parameterType="mberVO">
+		UPDATE MBER_INFO
+		   SET PASSWORD	= REPRSNT_EMAIL
+		 WHERE MBER_CD	= #{mberCd}
+	</update>
+
+
+	<!-- 포인트조회 -->
+	<select id="CompPointList" parameterType="mberVO" resultType="mberVO">
+			SELECT '전시참여' AS TITLE , BB.EXBI_NM AS NAME, 5 AS SCORE
+               FROM
+                   EXBI_REQST_INFO AA
+                   JOIN EXBI_REGIST_INFO BB
+                   ON AA.EXBI_CD = BB.EXBI_CD
+               WHERE
+                   ENTRPRS_MBER_CD = #{mberCd}
+           UNION ALL 
+			SELECT '상담참여' AS TITLE, BB.EVENT_NM AS NAME, 3 AS SCORE
+               FROM
+                   CNSLTEXHB_REQST_INFO AA
+                   JOIN CNSLTEXHB_REGIST_INFO BB
+                   ON AA.CNSLTEXHB_CD = BB.CNSLTEXHB_CD
+               WHERE
+                   ENTRPRS_MBER_CD = #{mberCd}
+           UNION ALL 
+           	SELECT '사업결과 등록' AS TITLE , BB.EVENT_NM AS NAME, 2 AS SCORE
+               FROM
+                   (
+                       SELECT DISTINCT CNSLTEXHB_CD , ENTRPRS_MBER_CD , 1 AS CNT
+                       FROM
+                           CNSLTEXHB_RSLT_INFO
+                       WHERE
+                           CNTRCT_PRTN_BEFORE_AMT IS NOT NULL
+                   ) AA 
+                   JOIN CNSLTEXHB_REGIST_INFO BB
+                   ON AA.CNSLTEXHB_CD = BB.CNSLTEXHB_CD
+               WHERE
+                   ENTRPRS_MBER_CD = #{mberCd}
+           UNION ALL 
+           	SELECT '사후성과 등록' AS TITLE, BB.EVENT_NM AS NAME , 5 AS SCORE
+               FROM
+                   (
+                       SELECT DISTINCT CNSLTEXHB_CD , ENTRPRS_MBER_CD , 1 AS CNT
+                       FROM
+                           CNSLTEXHB_RSLT_INFO
+                       WHERE
+                           CNTRCT_PRTN_AFTER_AMT IS NOT NULL
+                   ) AA
+                   JOIN CNSLTEXHB_REGIST_INFO BB
+                   ON AA.CNSLTEXHB_CD = BB.CNSLTEXHB_CD
+               WHERE
+                   ENTRPRS_MBER_CD = #{mberCd}
+           UNION ALL
+			SELECT '조합원사' AS TITLE , '' NAME, CASE WHEN UNION_COMP_YN = 'Y' THEN 5 ELSE 0 END AS SCORE 
+			FROM MBER_INFO 
+			WHERE SSBYP = '2'
+			AND MBER_CD	= #{mberCd}
+	</select>
+	<select id="CompPointListSum" parameterType="mberVO" resultType="int">
+		SELECT SUM(SCORE) AS score FROM (
+			SELECT '전시참여' AS TITLE , BB.EXBI_NM AS NAME, 5 AS SCORE
+               FROM
+                   EXBI_REQST_INFO AA
+                   JOIN EXBI_REGIST_INFO BB
+                   ON AA.EXBI_CD = BB.EXBI_CD
+               WHERE
+                   ENTRPRS_MBER_CD = #{mberCd}
+           UNION ALL 
+			SELECT '상담참여' AS TITLE, BB.EVENT_NM AS NAME, 3 AS SCORE
+               FROM
+                   CNSLTEXHB_REQST_INFO AA
+                   JOIN CNSLTEXHB_REGIST_INFO BB
+                   ON AA.CNSLTEXHB_CD = BB.CNSLTEXHB_CD
+               WHERE
+                   ENTRPRS_MBER_CD = #{mberCd}
+           UNION ALL 
+           	SELECT '사업결과 등록' AS TITLE , BB.EVENT_NM AS NAME, 2 AS SCORE
+               FROM
+                   (
+                       SELECT DISTINCT CNSLTEXHB_CD , ENTRPRS_MBER_CD , 1 AS CNT
+                       FROM
+                           CNSLTEXHB_RSLT_INFO
+                       WHERE
+                           CNTRCT_PRTN_BEFORE_AMT IS NOT NULL
+                   ) AA 
+                   JOIN CNSLTEXHB_REGIST_INFO BB
+                   ON AA.CNSLTEXHB_CD = BB.CNSLTEXHB_CD
+               WHERE
+                   ENTRPRS_MBER_CD = #{mberCd}
+           UNION ALL 
+           	SELECT '사후성과 등록' AS TITLE, BB.EVENT_NM AS NAME , 5 AS SCORE
+               FROM
+                   (
+                       SELECT DISTINCT CNSLTEXHB_CD , ENTRPRS_MBER_CD , 1 AS CNT
+                       FROM
+                           CNSLTEXHB_RSLT_INFO
+                       WHERE
+                           CNTRCT_PRTN_AFTER_AMT IS NOT NULL
+                   ) AA
+                   JOIN CNSLTEXHB_REGIST_INFO BB
+                   ON AA.CNSLTEXHB_CD = BB.CNSLTEXHB_CD
+               WHERE
+                   ENTRPRS_MBER_CD = #{mberCd}
+           UNION ALL
+			SELECT '조합원사' AS TITLE , '' NAME, CASE WHEN UNION_COMP_YN = 'Y' THEN 5 ELSE 0 END AS SCORE 
+			FROM MBER_INFO 
+			WHERE SSBYP = '2'
+			AND MBER_CD = #{mberCd}
+		) ORI
+	</select>
+	
+	<select id="MberPwCheck" parameterType="mberVO" resultType="mberVO">
+			SELECT * 
+			FROM MBER_INFO 
+			WHERE ID = #{id}
+			  AND PASSWORD = #{password}
+	</select>
+</mapper>
